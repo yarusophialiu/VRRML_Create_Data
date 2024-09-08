@@ -19,6 +19,26 @@ VRR_Patches = f'{VRRDATA}/VRR_Patches'
 VRR_Motion = r'C:\Users\15142\Projects\VRR\VRR_Motion'
 
 
+
+
+def count_files_in_folder(folder_path):
+    return len([f for f in os.listdir(folder_path) if os.path.isfile(os.path.join(folder_path, f))])
+
+
+def frame_limit_per_fps():
+    fps_arr = [30, 40, 50, 60, 70, 80, 90, 100, 110, 120,]
+    numOfFrames = 50
+    for frameRate in fps_arr: 
+        frameLimit = frameRate + int(numOfFrames * frameRate / 30.0) - frameRate
+        print(f'frameRate {frameRate}, frameLimit {frameLimit}')
+
+
+def frame_per_fps_video(fps):
+    numOfFrames = 50
+    frameLimit = fps + int(numOfFrames * fps / 30.0) - fps
+    return frameLimit
+
+        
 def mapIdToPath(id):
     """
     we run 15 jobs/tasks (allocate 13 gpus) at one time, each scene has 45 clips, so we run 3 times
@@ -290,7 +310,7 @@ def compute_motion(motion_file):
 
 
 
-
+scene_arr = ['bedroom', 'bistro', 'crytek_sponza', 'gallery', 'living_room', 'lost_empire', 'room', 'sibenik', 'suntemple', 'suntemple_statue']
 
 
 # JODs4000 = [4.647, 4.867, 4.954, 5.007, 5.056, 4.748, 4.956, 5.026, 5.089, 5.158, 5.043, 5.299, 5.394, 5.452, 5.503,]

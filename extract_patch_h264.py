@@ -60,9 +60,9 @@ def read_motion_vectors(file_path):
 
 def compute_velocity(patch, motion_vector_path):
     max_x, max_y = read_motion_vectors(motion_vector_path)
-    print(f'max_x, max_y {max_x, max_y}')
+    # print(f'max_x, max_y {max_x, max_y}')
     pixel_precision = max(int(max_x) + 1, int(max_y) + 1)
-    print(f'pixel_precision {pixel_precision}')
+    # print(f'pixel_precision {pixel_precision}')
     # print(f'patch {patch.size()} \n {patch}')
     # print(f'patch {patch.permute(1,2,0).size()} \n {patch.permute(1,2,0)}')
 
@@ -80,9 +80,8 @@ def compute_velocity(patch, motion_vector_path):
 
     sqrt_result = torch.sqrt(squared_sum)
     # print("Square root of odd^2 + even^2:\n", sqrt_result)
-    average = sqrt_result.mean()
-
-    return round(average.item(), 3)
+    average = round(sqrt_result.mean().item(), 3)
+    return average
 
 
 
@@ -96,24 +95,22 @@ def find_motion_patch_h265(video_path, dec_fps, fps, dec_frame_number, px, py, p
     # video_path = f'refBMP/refOutput_166_1080_8000.mp4'
     # video_path = f'refMP4/refOutput_166_1080_8000_bistro_121_0902.mp4'
     cap = cv2.VideoCapture(video_path)
-
     if not cap.isOpened():
         print("Error opening video file")
         return
     
     frame_ind = int(safe_floor((dec_frame_number-4)/dec_fps * fps) + 2)
-    print(f'dec_frame_number {dec_frame_number}, dec_fps {dec_fps}, fps {fps}')
+    # print(f'dec_frame_number {dec_frame_number}, dec_fps {dec_fps}, fps {fps}')
 
     cap.set(cv2.CAP_PROP_POS_FRAMES, frame_ind)
     ret, frame = cap.read() # frame (360, 640, 3)
-
     if not ret: # If frame is read correctly ret is True
         print(f"Error: Could not read frame {frame_ind}")
         return None
 
     frame = torch.from_numpy(frame).permute(2, 0, 1) # 3, 360, 640
     # show_patch(frame.permute(1,2,0)) # after permute 360, 640, 3
-    print(f'frame {frame.permute(1,2,0).size()}') # 1080, 1920, 3 
+    # print(f'frame {frame.permute(1,2,0).size()}') # 1080, 1920, 3 
     patch = frame[:, py:py+patch_size[0], px:px+patch_size[1]]
     # print(f'patch {patch.permute(1,2,0).size()} \n {patch.permute(1,2,0)}')
     # show_patch(patch.permute(1,2,0))
@@ -143,7 +140,7 @@ def generate_patches(base_dir, bitrate, fps, resolution, motion_vector_path, mot
     
     frame_generated = 0
 
-    frame_number = 0
+    frame_number = 0 # decoded video frame index that will be passed to find_motion_patch_h265
     while cap.isOpened(): # Read until video is completed
         # if count + frame_generated >= NUM_PATCH_REQUIRED:
         #     break
@@ -152,33 +149,28 @@ def generate_patches(base_dir, bitrate, fps, resolution, motion_vector_path, mot
             break
         
         frame = torch.from_numpy(frame).permute(2, 0, 1) # 3, 360, 640
-        print(f'frame.shape {frame.shape}')
+        # print(f'frame.shape {frame.shape}')
         # show_patch(frame.permute(1,2,0)) # after permute 360, 640, 3
         # height, width, _ = frame.shape
         height, width = 1080, 1920
         interpolated_img = torch.nn.functional.interpolate(frame.unsqueeze(0), size=(height, width), mode='bicubic').squeeze(0)
-        print(f'interpolated_img {interpolated_img.size()} {interpolated_img.permute(1,2,0).size()}')
-        
+        # print(f'interpolated_img {interpolated_img.size()} {interpolated_img.permute(1,2,0).size()}')
         # show_patch(interpolated_img.permute(1,2,0))
+        # print(f'======================= frame_number {frame_number} =======================') # 1 frame generate number of rounds patches
         for _ in range(rounds):
             # if count >= NUM_PATCH_REQUIRED:
             #         break
             interpolated_patch, px, py = get_random_patch(width, height, patch_size, interpolated_img)
-            print(f'interpolated_patch {interpolated_patch.size()}') # [3, 1080, 1080])
-            print(f'px py {px, py}')
+            # print(f'interpolated_patch {interpolated_patch.size()}') # [3, 1080, 1080])
+            # print(f'px py {px, py}')
             # show_patch(interpolated_patch.permute(1,2,0))
 
             motion_patch = find_motion_patch_h265(motion_video_path, fps, 166, frame_number, px, py, patch_size=(64, 64))
-
             velocity = compute_velocity(motion_patch, motion_vector_path)
-            print(f'velocity {velocity}')
+            # print(f'velocity {velocity}')
 
             hex_unique_id = secrets.token_hex(4)
             # path = f'{output_folder}/{hex_unique_id}_{frame_index}_{fps}_{resolution}_{bitrate}.png'
-            # path = f'{output_dir}/{hex_unique_id}_{fps}_{resolution}_{bitrate}.png'
-            # if scene:
-            #     path = f'{output_png_dir}/{hex_unique_id}_{fps}_{resolution}_{bitrate}_x{scene}.png'
-            # else:
             path = f'{output_png_dir}/{hex_unique_id}_{fps}_{resolution}_{bitrate}_{int(velocity*1000)}.png'
             if SAVE:
                 to_pil = transforms.ToPILImage()
@@ -193,66 +185,62 @@ def generate_patches(base_dir, bitrate, fps, resolution, motion_vector_path, mot
     # cap.release() # When everything done, release the video capture object
     # # print(f"Processing completed. {frame_generated} generated for resolution {resolution}")
         frame_number += 1
-        if frame_number >= 10:
-            break
+
+        # if frame_number >= 10:
+        #     break
     return frame_generated
 
 
 
-
+# each id is 1 path_seg_speed, loop through all scenes given 1 id
 if __name__ == "__main__":
     id = 1
     # scene can be passed
 
-    # base_path = f'C:/Users/15142/new/Falcor/Source/Samples/EncodeDecode/encodedH264/data'
-    # scene_arr = ['bistro_glasses2', 'bistropath_one1', ]
-    scene_arr = ['bistropath_one1', 'bistropath_one2', 'bistropath_three1', 'bistropath_three2', 'bistro_glasses2', \
-                 'breakfast_room_two1', 'lost_empire_three1',  'sponza_three1', \
-                  'paint2', 'room1', 'room2', \
-                  'suntemple1', 'suntemple2', 
-                #   'suntemple_statue2'
-                  ]
-    scene_arr = ["bistro"]
+    scene_arr = ["bistro"] # full list are in utils.py
     resolution_arr = [360, 480, 720, 864, 1080]
-    resolution_arr = [360]
+    resolution_arr = [360, 480, 720]
     bitrates = [500, 1000, 1500, 2000,]
     bitrates = [500]
     fps_arr = [30, 40, 50, 60, 70, 80, 90, 100, 110, 120,]
-    fps_arr = [30,]
+    fps_arr = [30, 40]
     SAVE = True # True, False
 
     id -= 1
     path, seg, speed = mapIdToPath(id)
     print(f'path, seg, speed {path, seg, speed}')
+
     for scene in scene_arr:
         print(f'====================== scene {scene} ======================')
-
         base_directory = f'{VRRMP4_CVVDP}/{scene}/{scene}_path{path}_seg{seg}_{speed}'
         current_date = datetime.date.today()
         output_folder = f'{VRR_Patches}/{current_date}/{scene}/{scene}_path{path}_seg{seg}_{speed}'
         os.makedirs(output_folder, exist_ok=True)
 
         total = 0
-        # NUM_PATCH_REQUIRED = 120 * len(fps_arr) * len(bitrates) # 665
-        # for each fps, 120 * len(resolution_arr) patches 
-        NUM_PATCH_REQUIRED = 120 * len(resolution_arr) 
-
-        # print(f'NUM_PATCH_REQUIRED {NUM_PATCH_REQUIRED}')
+        frame_save_per_video = 200 # fps 120 has 200 frames in 1 video, framelimit - fps
+        NUM_PATCH_REQUIRED = frame_save_per_video * len(resolution_arr) # 665, each bistrate, fps, path_seg_speed 
+        print(f'NUM_PATCH_REQUIRED {NUM_PATCH_REQUIRED}')
 
         motion_vector_path = f'{VRR_Motion}/motion_vector/{scene}/{scene}_path{path}_seg{seg}_{speed}_velocity_cleaned.txt'
         motion_video_path = f'{VRR_Motion}/refMP4/{scene}/{scene}_path{path}_seg{seg}_{speed}_refOutput_166_1080_8000.mp4'
+
+        # bistro_path1_seg1_1\500kbps should have NUM_PATCH_REQUIRED * len(fps)
         for bitrate in bitrates: # 120 * len(fps_arr) patches for each bitrate
             print(f'====================== bitrate {bitrate} ======================')
             for fps in fps_arr: # for each fps, save 120 patches for each resolution
                 print(f'====================== fps {fps} ======================')
-
-                # rounds = int(120/fps) # make sure different fps has same number of patches
-                rounds = 1
-                # print(f'rounds {rounds}')
+                frame_created_per_fps_video = frame_per_fps_video(fps) # how many frames does this fps video have
+                print(f'frame_limit_per_fps_video {frame_created_per_fps_video}')
+                rounds = int(frame_save_per_video/frame_created_per_fps_video) # how many patches do we generate per frame, make sure different fps has same number of patches
+                # rounds = 1
+                print(f'rounds {rounds}')
                 count = 0 # count total number of patches generated for the fps
                 for resolution in resolution_arr: # 120 patches saved for each resolution
-                        count += generate_patches(base_directory, bitrate, fps, resolution, motion_vector_path, motion_video_path, \
+                        patch_generated = generate_patches(base_directory, bitrate, fps, resolution, motion_vector_path, motion_video_path, \
                                                         count, rounds=rounds, output_dir=output_folder, scene=scene, patch_size=(64, 64))
+                        print(f'{patch_generated} patches generated for resolution {resolution}p')
+                        count += patch_generated
                         # total += count
                 # # print(f'for loop {count} for {len(resolution_arr)} resolution')
                 # # for resolution in [360, 480, 720, 864, 1080]:
@@ -268,7 +256,7 @@ if __name__ == "__main__":
                 #                                     count, output_dir=output_folder)
                 #     # print(f'after resolution {resolution}, count {count}')
                 # total += count
-                # # print(f'{count} data generated for fps {fps}')
+                print(f'{count} data generated for fps {fps}')
         print(f'{total} data generated for {len(bitrates)} bitrates, {len(fps_arr)} fps and {len(resolution_arr)} resolutions.')
 
 
