@@ -42,7 +42,6 @@ patch = torch.tensor([[[  0,   0,   0,   0,   0,   0,   0,   0],
          [184, 184, 184, 184, 184, 184, 184, 184]]])
 
 h, w = patch.shape[1], patch.shape[2]  # height and width
-print(h, w)
 
 blue_channel = patch[0, :, :]
 odd_channel_processed = patch[1, :, :].float()  # Convert to float for calculations
@@ -62,18 +61,29 @@ odd_channel = odd_channel / (0.5 * h)  # Undo the scaling based on height
 # print(even_channel**2)
 # print(odd_channel**2)
 
-squared_sum = odd_channel ** 2 + even_channel ** 2
+# squared_sum = odd_channel ** 2 + even_channel ** 2
 
-# Compute the square root of the sum
-# print(f'squared_sum \n {squared_sum}')
+# # Compute the square root of the sum
+# # print(f'squared_sum \n {squared_sum}')
 
-sqrt_result = torch.sqrt(squared_sum)
+# sqrt_result = torch.sqrt(squared_sum)
 
-print("Square root of odd^2 + even^2:\n", sqrt_result)
-total_sum = sqrt_result.sum()
+# print("Square root of odd^2 + even^2:\n", sqrt_result)
+# total_sum = sqrt_result.sum()
 
-# Take the average of sqrt_result
-average = sqrt_result.mean()
+# # Take the average of sqrt_result
+# average = sqrt_result.mean()
 
-print("Sum of sqrt_result:", total_sum.item())
-print("Average of sqrt_result:", average.item())
+# print("Sum of sqrt_result:", total_sum.item())
+# print("Average of sqrt_result:", average.item())
+
+# fps_arr = [30, 40, 50, 60, 70, 80, 90, 100, 110, 120,]
+# numOfFrames = 50
+# for frameRate in fps_arr: 
+#     frameLimit = frameRate + numOfFrames * frameRate / 30.0
+    # print(f'frameRate {frameRate}, frameLimit {frameLimit}')
+
+# frame_limit_per_fps()
+
+path, seg, speed = mapIdToPath(44)
+print(path, seg, speed)

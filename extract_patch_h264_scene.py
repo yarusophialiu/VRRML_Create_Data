@@ -1,7 +1,6 @@
 import cv2
 import numpy as np
 import os
-import gc
 import secrets
 from utils import *
 from utils import *
@@ -9,30 +8,12 @@ import datetime
 import argparse
 import torch
 import torchvision.transforms as transforms
-from memory_profiler import profile
-
-
-
-
-def get_patch_by_grid(width, height, patch_size, frame):
-    # Generate patches by dividing frame to 64x64 grids
-    for i in range(0, height, patch_size[0]):
-        for j in range(0, width, patch_size[1]):
-            # Ensure the patch does not go out of frame boundaries
-            if (i + patch_size[0] <= height) and (j + patch_size[1] <= width):
-                # print(f'i, j {i, j}')
-                patch = frame[i:i+patch_size[0], j:j+patch_size[1]]
-                # show_patch(patch)
-
-                # Save or process the patch here
-                # cv2.imwrite(f'{output_folder}/patch_{frame_index}_{i}_{j}.png', patch)
-            break
 
 
 def get_random_patch(width, height, patch_size, interpolated_img):
     max_x = width - patch_size[1]
     max_y = height - patch_size[0]
-    x = np.random.randint(0, max_x + 1) # TODO
+    x = np.random.randint(0, max_x + 1) 
     y = np.random.randint(0, max_y + 1)
     # print(f'x, y {x, y}')
 
@@ -119,7 +100,6 @@ def find_motion_patch_h265(video_path, dec_fps, fps, dec_frame_number, px, py, p
     return patch
 
 
-# @profile
 def generate_patches(base_dir, bitrate, fps, resolution, motion_vector_path, motion_video_path, frame_indices, rounds=1, patch_size=(64, 64), output_dir="output", scene=None):
     """
     base_dir, e.g. VRRMP4_CVVDP/bistro/bistro_path1_seg1_1
@@ -182,10 +162,7 @@ def generate_patches(base_dir, bitrate, fps, resolution, motion_vector_path, mot
                 interpolated_patch = to_pil(interpolated_patch)
                 interpolated_patch.save(path, "png")
             frame_generated += 1
-            
-        # del frame
-        # del interpolated_img
-        # gc.collect()
+
         # show_patch(patch)
         frame_number += 1
         
@@ -195,7 +172,6 @@ def generate_patches(base_dir, bitrate, fps, resolution, motion_vector_path, mot
     return frame_generated
 
 
-# @profile
 def compute_per_bitrate(bitrates, fps_arr, total):
     for bitrate in bitrates: 
         print(f'====================== bitrate {bitrate} ======================')
@@ -204,17 +180,17 @@ def compute_per_bitrate(bitrates, fps_arr, total):
             frame_created_per_fps_video = frame_per_fps_video(fps) # how many frames does this fps video have
             frame_indices = np.random.choice(frame_created_per_fps_video, frame_save_per_video, replace=False)
             frame_indices.sort()
-            # print(f'frame_indices {frame_indices}')
-            # print(f'frame_limit_per_fps_video {frame_created_per_fps_video}')
+            print(f'frame_indices {frame_indices}')
+            print(f'frame_limit_per_fps_video {frame_created_per_fps_video}')
             rounds = int(frame_save_per_video/frame_created_per_fps_video) # how many patches do we generate per frame, make sure different fps has same number of patches
             rounds = max(1, rounds)
-            # print(f'rounds {rounds}')
+            print(f'rounds {rounds}')
             count = 0 # count total number of patches generated for the fps
             for resolution in resolution_arr:
-                    # print(f'resolution {resolution}') 
+                    print(f'resolution {resolution}') 
                     patch_generated = generate_patches(base_directory, bitrate, fps, resolution, motion_vector_path, motion_video_path, \
                                                     frame_indices, rounds=rounds, output_dir=output_folder, scene=scene, patch_size=(64, 64))
-                    # print(f'{patch_generated} patches generated for resolution {resolution}p')
+                    print(f'{patch_generated} patches generated for resolution {resolution}p')
                     count += patch_generated
             total += count
             print(f'{count} data generated for fps {fps}')
@@ -223,42 +199,64 @@ def compute_per_bitrate(bitrates, fps_arr, total):
 
 # each id is 1 path_seg_speed, loop through all scenes given 1 id
 if __name__ == "__main__":
-    # parser = argparse.ArgumentParser(description='Process some integers.')
-    # parser.add_argument('SLURM_ARRAY_TASK_ID', type=int, help='The id of task')
-    # args = parser.parse_args()
-    # id = args.SLURM_ARRAY_TASK_ID
-    # id = 3
+    parser = argparse.ArgumentParser(description='Process some integers.')
+    parser.add_argument('SLURM_ARRAY_TASK_ID', type=int, help='The id of task')
+    parser.add_argument('scene', type=str, help='The id of task')
+    args = parser.parse_args()
+    id = args.SLURM_ARRAY_TASK_ID
+    scene = args.scene
+    # id = 1
 
     # scene_arr = ["bistro"] # full list are in utils.py
     resolution_arr = [360, 480, 720, 864, 1080]
     # resolution_arr = [360]
     bitrates = [500, 1000, 1500, 2000,]
-    bitrates = [2000]
+    bitrates = [500, 1000] # TODO
     fps_arr = [30, 40, 50, 60, 70, 80, 90, 100, 110, 120,]
     # fps_arr = [120,]
     SAVE = True # True, False
-    for id in range(32, 33):
-        id -= 1
-        path, seg, speed = mapIdToPath(id)
-        print(f'id {id}, path, seg, speed {path, seg, speed}')
+    scene_arr = ['bedroom'] # TODO
 
-        # scene_arr = ['bistro'] # TODO
-        frame_save_per_video = 50 # fps 120 has 200 frames in 1 video, framelimit - fps is number of frames per video
-        NUM_PATCH_REQUIRED = frame_save_per_video * len(resolution_arr) # 665, each bistrate, fps, path_seg_speed 
-        print(f'NUM_PATCH_REQUIRED {NUM_PATCH_REQUIRED}')
-        
-        scene_arr = ['suntemple_statue']
-        scene = scene_arr[0]
-        # for scene in scene_arr:
-        print(f'====================== scene {scene} ======================')
-        base_directory = f'{VRRMP4_CVVDP}/{scene}/{scene}_path{path}_seg{seg}_{speed}'
-        current_date = datetime.date.today()
-        output_folder = f'{VRR_Patches}/{current_date}/{scene}/{scene}_path{path}_seg{seg}_{speed}'
-        os.makedirs(output_folder, exist_ok=True)
+    id -= 1
+    path, seg, speed = mapIdToPath(id)
+    print(f'path, seg, speed {path, seg, speed}')
 
-        total = 0
+    frame_save_per_video = 50 # fps 120 has 200 frames in 1 video, framelimit - fps is number of frames per video
+    NUM_PATCH_REQUIRED = frame_save_per_video * len(resolution_arr) # 665, each bistrate, fps, path_seg_speed 
+    print(f'NUM_PATCH_REQUIRED {NUM_PATCH_REQUIRED}')
+    
+    # for scene in scene_arr:
+    print(f'====================== scene {scene} ======================')
+    base_directory = f'{VRRMP4_CVVDP}/{scene}/{scene}_path{path}_seg{seg}_{speed}'
+    current_date = datetime.date.today()
+    output_folder = f'{VRR_Patches}/{current_date}/{scene}/{scene}_path{path}_seg{seg}_{speed}'
+    os.makedirs(output_folder, exist_ok=True)
 
-        motion_vector_path = f'{VRR_Motion}/reference/motion_vector_reference/{scene}/{scene}_path{path}_seg{seg}_{speed}_velocity_cleaned.txt'
-        motion_video_path = f'{VRR_Motion}/reference/refMP4_reference/{scene}/{scene}_path{path}_seg{seg}_{speed}_refOutput_166_1080_8000.mp4'
-        # bistro_path1_seg1_1\500kbps should have NUM_PATCH_REQUIRED * len(fps)
-        compute_per_bitrate(bitrates, fps_arr, total)
+    total = 0
+
+    motion_vector_path = f'{VRR_Motion}/reference/motion_vector_reference/{scene}/{scene}_path{path}_seg{seg}_{speed}_velocity_cleaned.txt'
+    motion_video_path = f'{VRR_Motion}/reference/refMP4_reference/{scene}/{scene}_path{path}_seg{seg}_{speed}_refOutput_166_1080_8000.mp4'
+    compute_per_bitrate(bitrates, fps_arr, total)
+        # # bistro_path1_seg1_1\500kbps should have NUM_PATCH_REQUIRED * len(fps)
+        # for bitrate in bitrates: 
+        #     print(f'====================== bitrate {bitrate} ======================')
+        #     for fps in fps_arr: 
+        #         print(f'====================== fps {fps} ======================')
+        #         frame_created_per_fps_video = frame_per_fps_video(fps) # how many frames does this fps video have
+        #         frame_indices = np.random.choice(frame_created_per_fps_video, frame_save_per_video, replace=False)
+        #         frame_indices.sort()
+        #         print(f'frame_indices {frame_indices}')
+        #         print(f'frame_limit_per_fps_video {frame_created_per_fps_video}')
+        #         rounds = int(frame_save_per_video/frame_created_per_fps_video) # how many patches do we generate per frame, make sure different fps has same number of patches
+        #         rounds = max(1, rounds)
+        #         print(f'rounds {rounds}')
+        #         count = 0 # count total number of patches generated for the fps
+        #         for resolution in resolution_arr:
+        #                 print(f'resolution {resolution}') 
+        #                 patch_generated = generate_patches(base_directory, bitrate, fps, resolution, motion_vector_path, motion_video_path, \
+        #                                                 frame_indices, rounds=rounds, output_dir=output_folder, scene=scene, patch_size=(64, 64))
+        #                 print(f'{patch_generated} patches generated for resolution {resolution}p')
+        #                 count += patch_generated
+        #         total += count
+        #         print(f'{count} data generated for fps {fps}')
+        # print(f'{total} data generated for {len(bitrates)} bitrates, {len(fps_arr)} fps and {len(resolution_arr)} resolutions.')
