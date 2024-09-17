@@ -119,7 +119,6 @@ def find_motion_patch_h265(video_path, dec_fps, fps, dec_frame_number, px, py, p
     return patch
 
 
-# @profile
 def generate_patches(base_dir, bitrate, fps, resolution, motion_vector_path, motion_video_path, frame_indices, rounds=1, patch_size=(64, 64), output_dir="output", scene=None):
     """
     base_dir, e.g. VRRMP4_CVVDP/bistro/bistro_path1_seg1_1
@@ -164,7 +163,7 @@ def generate_patches(base_dir, bitrate, fps, resolution, motion_vector_path, mot
         # print(f'interpolated_img {interpolated_img.size()} {interpolated_img.permute(1,2,0).size()}')
         # show_patch(interpolated_img.permute(1,2,0))
         # print(f'======================= frame_number {frame_number} =======================') # 1 frame generate number of rounds patches
-        for _ in range(rounds):
+        for _ in range(rounds): # rounds is always 1 here
             interpolated_patch, px, py = get_random_patch(width, height, patch_size, interpolated_img)
             # print(f'interpolated_patch {interpolated_patch.size()}') # [3, 1080, 1080])
             # print(f'px py {px, py}')
@@ -195,7 +194,6 @@ def generate_patches(base_dir, bitrate, fps, resolution, motion_vector_path, mot
     return frame_generated
 
 
-# @profile
 def compute_per_bitrate(bitrates, fps_arr, total):
     for bitrate in bitrates: 
         print(f'====================== bitrate {bitrate} ======================')
@@ -233,11 +231,11 @@ if __name__ == "__main__":
     resolution_arr = [360, 480, 720, 864, 1080]
     # resolution_arr = [360]
     bitrates = [500, 1000, 1500, 2000,]
-    bitrates = [2000]
+    # bitrates = [2000]
     fps_arr = [30, 40, 50, 60, 70, 80, 90, 100, 110, 120,]
     # fps_arr = [120,]
     SAVE = True # True, False
-    for id in range(32, 33):
+    for id in range(35, 46):
         id -= 1
         path, seg, speed = mapIdToPath(id)
         print(f'id {id}, path, seg, speed {path, seg, speed}')
