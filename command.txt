@@ -1,0 +1,3 @@
+unzip /home/yl962/rds/hpc-work/VRR/Data/VRR_Patches/2024-09-12/bistro.zip -d /dev/shm/VRRML/train
+mv /dev/shm/VRRML/train/bistro/* /dev/shm/VRRML/train/
+rmdir /dev/shm/VRRML/train/bistro

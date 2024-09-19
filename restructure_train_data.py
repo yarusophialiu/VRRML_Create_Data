@@ -46,7 +46,7 @@ def creat_new_train_dir(old_train_dir, new_train_dir):
                             # print(f'copied {num_patches} patches to {new_folder_path}')
 
 
-
+# create path_bitrate folders
 if __name__ == "__main__":
     src_train_dir = f'{VRRML}/ML/test'
     dest_train_dir = f'{VRRML}/ML/test_bitratelabel'
