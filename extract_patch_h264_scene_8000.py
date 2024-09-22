@@ -47,7 +47,6 @@ def compute_velocity(patch, motion_vector_path):
     # print(f'patch {patch.permute(1,2,0).size()} \n {patch.permute(1,2,0)}')
 
     h, w = patch.shape[1], patch.shape[2]  # height and width
-    # print(h, w)
     odd_channel_processed = patch[1, :, :].float()  # Convert to float for calculations
     even_channel_processed = patch[2, :, :].float()
     # print(odd_channel_processed)
@@ -134,7 +133,7 @@ def generate_patches(base_dir, path_name, motion_vector_path, motion_video_path,
         interpolated_patch, px, py = get_random_patch(width, height, patch_size, frame)
         # print(f'interpolated_patch {interpolated_patch.size()}') # [3, 1080, 1080])
 
-        motion_patch = find_motion_patch_h265(motion_video_path, fps, 166, frame_number, px, py, patch_size=(64, 64))
+        motion_patch = find_motion_patch_h265(motion_video_path, fps, 166, frame_number, px, py, patch_size=patch_size)
         velocity = compute_velocity(motion_patch, motion_vector_path)
         # print(f'velocity {velocity}')
         # show_patch(interpolated_patch.permute(1,2,0))
@@ -162,7 +161,7 @@ def compute_per_bitrate(fps, resolution, path_name, total):
     frame_indices = [i for i in range(276)]
     count = 0 # count total number of patches generated for the fps
     patch_generated = generate_patches(base_directory, path_name, motion_vector_path, motion_video_path, \
-                                    frame_indices, output_dir=output_folder, scene=scene, patch_size=(64, 64))
+                                    frame_indices, output_dir=output_folder, scene=scene, patch_size=(PATCH_SIZE, PATCH_SIZE))
     print(f'{patch_generated} patches generated for resolution {resolution}p')
     count += patch_generated
     total += count
@@ -180,26 +179,33 @@ if __name__ == "__main__":
     # scene = args.scene
     # id = 1
 
-    scene = 'bedroom'
+    scenes = [
+            'bedroom', 'bistro', 
+             'crytek_sponza', 
+            'gallery', 
+             'living_room', 'lost_empire', 
+             'room', 'suntemple', 
+             ]
     fps = 166
     resolution = 1080
     SAVE = True # True, False
+    PATCH_SIZE = 256
 
+    for scene in scenes:
+        for id in range(1, 46):
+            id -= 1
+            path, seg, speed = mapIdToPath(id)
+            # print(f'path, seg, speed {path, seg, speed}')
 
-    for id in range(1, 46):
-        id -= 1
-        path, seg, speed = mapIdToPath(id)
-        print(f'path, seg, speed {path, seg, speed}')
+            print(f'====================== scene {scene} ======================')
+            base_directory = f'{VRRMP4_reference}/reference_{scene}'
+            current_date = datetime.date.today()
+            output_folder = f'{VRR_Patches}/{current_date}/reference_{scene}/{scene}_path{path}_seg{seg}_{speed}'
+            os.makedirs(output_folder, exist_ok=True)
 
-        print(f'====================== scene {scene} ======================')
-        base_directory = f'{VRRMP4_reference}/reference_{scene}'
-        current_date = datetime.date.today()
-        output_folder = f'{VRR_Patches}/{current_date}/reference_{scene}/{scene}_path{path}_seg{seg}_{speed}'
-        os.makedirs(output_folder, exist_ok=True)
+            path_name = f'{scene}_path{path}_seg{seg}_{speed}'
 
-        path_name = f'{scene}_path{path}_seg{seg}_{speed}'
-
-        total = 0
-        motion_vector_path = f'{VRR_Motion}/reference/motion_vector_reference/{scene}/{scene}_path{path}_seg{seg}_{speed}_velocity_cleaned.txt'
-        motion_video_path = f'{VRR_Motion}/reference/refMP4_reference/{scene}/{scene}_path{path}_seg{seg}_{speed}_refOutput_166_1080_8000.mp4'
-        compute_per_bitrate(fps, resolution, path_name, total)
+            total = 0
+            motion_vector_path = f'{VRR_Motion}/reference/motion_vector_reference/{scene}/{scene}_path{path}_seg{seg}_{speed}_velocity_cleaned.txt'
+            motion_video_path = f'{VRR_Motion}/reference/refMP4_reference/{scene}/{scene}_path{path}_seg{seg}_{speed}_refOutput_166_1080_8000.mp4'
+            compute_per_bitrate(fps, resolution, path_name, total)

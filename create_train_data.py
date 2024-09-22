@@ -43,8 +43,8 @@ def rename_subfolders_for_scene(scene, velocity_dict, base_dir, bitrates, MOVE=F
 
             print(f"Renaming {old_folder_path}")
             print(f"to {new_folder_path}\n")
-            # if MOVE:
-            shutil.move(old_folder_path, new_folder_path)
+            if MOVE:
+                shutil.move(old_folder_path, new_folder_path)
 
             # if MOVE:
             #     destination = f'{training_data_dir}/{scene}/{scene}_{sequence_name}/{new_folder_name}'

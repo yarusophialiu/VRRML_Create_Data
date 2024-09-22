@@ -20,7 +20,8 @@ def rename_subfolders_for_scene(scene, velocity_dict, scene_folder, bitrates, de
     count = 0
     for sequence_name, params_list in velocity_dict.items(): # bistro_path1_seg1_1: [[xxx], [xxx], [xxx]]
         sequence_path = f'{scene_folder}/{scene}_{sequence_name}'
-        print(f'sequence_path {sequence_path}')
+        print(f'path folder {scene}_{sequence_name}')
+        # print(f'sequence_path {sequence_path}')
         if not os.path.exists(sequence_path):
             print(f"Folder '{sequence_path}' does not exist. Skipping.")
             continue
@@ -39,9 +40,9 @@ def rename_subfolders_for_scene(scene, velocity_dict, scene_folder, bitrates, de
             # with fps, resolution, velocity, bitrate
             for filename in os.listdir(sequence_path):
                 parts = filename.split("_")
-                newfilename = f'{parts[0]}_166_1080_{bitrate}_{parts[1]}'
+                newfilename = f'{parts[0]}_166_1080_{bitrate}_{scene}_{sequence_name}_{parts[1]}'
                 # print(f'filename {filename}')
-                # print(f'newfilename {newfilename}')
+                print(f'newfilename {newfilename}')
 
                 old_file_path = f'{sequence_path}/{filename}'
                 new_file_path= f'{new_folder_path}/{newfilename}'
@@ -62,10 +63,15 @@ def rename_subfolders_for_scene(scene, velocity_dict, scene_folder, bitrates, de
 # all data are extracted from reference video
 if __name__ == "__main__":
     bitrates = [500, 1000, 1500, 2000]
-    reference_dir  = r'C:\Users\15142\Projects\VRR\Data\VRR_Patches\2024-09-19'
+    reference_dir  = r'C:\Users\15142\Projects\VRR\Data\VRR_Patches\2024-09-21'
     dest_path = r'C:\Users\15142\Projects\VRR\Data\VRR_Patches\reference'
-    scene_arr = ['bedroom']
-    COPY = True # False True
+    scene_arr = ['bedroom', 
+            #  'crytek_sponza', 'gallery', 
+            #  'living_room', 'lost_empire', 
+            #  'room', 'sibenik', 'suntemple', 
+            #  'suntemple_statue'
+             ]
+    COPY = False # False True
 
     for scene in scene_arr:
         scene_dir = f'{reference_dir}/reference_{scene}'
