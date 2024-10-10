@@ -140,7 +140,7 @@ def generate_patches(base_dir, path_name, motion_vector_path, motion_video_path,
 
         hex_unique_id = secrets.token_hex(4)
         # path = f'{output_folder}/{hex_unique_id}_{frame_index}_{fps}_{resolution}_{bitrate}.png'
-        path = f'{output_dir}/{hex_unique_id}_{int(velocity*1000)}.png'
+        path = f'{output_dir}/{hex_unique_id}_{int(velocity*1000)}.png' if not FRAMENUMBER_SHOW else f'{output_dir}/{hex_unique_id}_{frame_number}_{int(velocity*1000)}.png'
         if SAVE:
             to_pil = transforms.ToPILImage()
             interpolated_patch = to_pil(interpolated_patch)
@@ -170,6 +170,7 @@ def compute_per_bitrate(fps, resolution, path_name, total):
 
 # each id is 1 path_seg_speed, loop through all scenes given 1 id
 # extract from 8000kbps bitrate only
+# then run prepar_dataset_reference.py
 if __name__ == "__main__":
     # parser = argparse.ArgumentParser(description='Process some integers.')
     # parser.add_argument('SLURM_ARRAY_TASK_ID', type=int, help='The id of task')
@@ -180,19 +181,23 @@ if __name__ == "__main__":
     # id = 1
 
     scenes = [
-            'bedroom', 'bistro', 
-             'crytek_sponza', 
-            'gallery', 
-             'living_room', 'lost_empire', 
-             'room', 'suntemple', 
+            # 'bedroom', 
+            'bistro', 
+            #  'crytek_sponza', 
+            #  'gallery', 
+            #  'living_room', 
+            #  'lost_empire', 
+            #  'room', 'suntemple',
+            # 'sibenik', 'suntemple_statue' 
              ]
     fps = 166
     resolution = 1080
     SAVE = True # True, False
     PATCH_SIZE = 256
+    FRAMENUMBER_SHOW = True
 
     for scene in scenes:
-        for id in range(1, 46):
+        for id in range(1, 2):
             id -= 1
             path, seg, speed = mapIdToPath(id)
             # print(f'path, seg, speed {path, seg, speed}')
@@ -204,6 +209,7 @@ if __name__ == "__main__":
             os.makedirs(output_folder, exist_ok=True)
 
             path_name = f'{scene}_path{path}_seg{seg}_{speed}'
+            print(f'path_name {path_name}')
 
             total = 0
             motion_vector_path = f'{VRR_Motion}/reference/motion_vector_reference/{scene}/{scene}_path{path}_seg{seg}_{speed}_velocity_cleaned.txt'
