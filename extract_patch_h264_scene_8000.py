@@ -182,22 +182,23 @@ if __name__ == "__main__":
 
     scenes = [
             # 'bedroom', 
-            'bistro', 
+            # 'bistro', 
             #  'crytek_sponza', 
             #  'gallery', 
             #  'living_room', 
             #  'lost_empire', 
             #  'room', 'suntemple',
-            # 'sibenik', 'suntemple_statue' 
+            # 'sibenik',
+             'suntemple_statue' 
              ]
     fps = 166
     resolution = 1080
     SAVE = True # True, False
-    PATCH_SIZE = 256
+    PATCH_SIZE = 64
     FRAMENUMBER_SHOW = True
 
     for scene in scenes:
-        for id in range(1, 2):
+        for id in range(1, 46):
             id -= 1
             path, seg, speed = mapIdToPath(id)
             # print(f'path, seg, speed {path, seg, speed}')

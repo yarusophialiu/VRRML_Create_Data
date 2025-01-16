@@ -15,12 +15,13 @@ import random
 
 # create test data from training data whose subfolders are label
 if __name__ == "__main__":
-    BASE = r'C:\Users\15142\Projects\VRR\Data\VRR_Patches\reference'
+    BASE = r'C:\Users\15142\Projects\VRR\Data\VRR_Patches\reference_new128'
     train_folder = f'{BASE}/train'
-    target_directory = f'{BASE}/validation'
+    target_directory = f'{BASE}/test'
     os.makedirs(target_directory, exist_ok=True)
     MOVE = True # False
     percent = 0.1
+    count = 0
 
 
     original_folder = train_folder
@@ -41,6 +42,7 @@ if __name__ == "__main__":
         os.makedirs(new_folder_path, exist_ok=True)
 
         for image in selected_images:
+            count += 1
             original_image_path = os.path.join(label_folder, image)
             new_image_path = os.path.join(new_folder_path, image)
             if MOVE:
@@ -50,3 +52,4 @@ if __name__ == "__main__":
         # break
         
         # print(f'all images {len(os.listdir(original_folder))}')
+        print(f'moved {count} images')

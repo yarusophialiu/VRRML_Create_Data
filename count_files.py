@@ -1,5 +1,5 @@
 import os
-import subprocess
+from utils import *
 
 def count_files_in_subfolders(root_directory):
     # Traverse the directory tree starting from the root directory
@@ -29,6 +29,8 @@ def count_files_in_subfolders(root_directory):
         break
     print(f'count_dir {count_dir}, count {count}')
 
+
+
 def count_files_in_folders(root_directory):
     # Traverse the directory tree starting from the root directory
     count = 0
@@ -46,13 +48,19 @@ def count_files_in_folders(root_directory):
 
 
 if __name__ == '__main__':
-    scene_arr = ["bedroom"] # crytek_sponza, sibenik, room, bedroom
-    scene_arr = [""] # crytek_sponza, sibenik, room, bedroom
+    # scene_arr = ["crytek_sponza", "room"] # crytek_sponza, sibenik, room, bedroom
+    scene_arr = ["bistro"] # crytek_sponza, sibenik, room, bedroom
     base_directory = r'C:\Users\15142\Projects\VRR\Data\VRR_Patches\HPC\cleaned_patches'
-    base_directory = r'C:\Users\15142\Projects\VRR\Data\VRRML\ML\train_bitratelabel' # test, val 225000
+    base_directory = r'C:\Users\15142\Projects\VRR\Data\VRRML\ML\train\bedroom_path1_seg1_1' # train folder 1440000, train_bitratelabel 288000, test, val 28800
+    base_directory = r'C:\Users\15142\Projects\VRR\Data\VRRML\ML\train_bitratelabel' # train folder 1440000, train_bitratelabel 288000, test, val 28800
+    base_directory = r'C:\Users\15142\Projects\VRR\Data\VRR_Patches\2024-09-19\reference'
+    base_directory = r'C:\Users\15142\Projects\VRR\Data\VRR_Patches\reference' # train 402435 val 49668 test 44697, 128x128 test 35756
+    base_directory = r'C:\Users\15142\Projects\VRR\Data\VRRML\ML\reference128X128' 
+    # train 402435 val 49668 test 44697, 128x128 test 35756
+    # under train, 20 patches per video, under train_bitratelabel, 4 patches a video
     for scene in scene_arr:
-        root_directory = f'{base_directory}'
-        print(f'root dir {root_directory}')
+        root_directory = f'{base_directory}/validation'
+        print(f'\n\n\nroot dir {root_directory}')
         # count_files_in_subfolders(root_directory)
         count_files_in_folders(root_directory)
 
