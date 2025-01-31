@@ -169,7 +169,7 @@ def compute_per_bitrate(fps, resolution, path_name, total):
 
 
 # each id is 1 path_seg_speed, loop through all scenes given 1 id
-# extract from 8000kbps bitrate only
+# extract from 8000kbps bitrate only, doenst contain jod
 # then run prepar_dataset_reference.py
 if __name__ == "__main__":
     # parser = argparse.ArgumentParser(description='Process some integers.')
@@ -181,15 +181,15 @@ if __name__ == "__main__":
     # id = 1
 
     scenes = [
-            # 'bedroom', 
-            # 'bistro', 
-            #  'crytek_sponza', 
-            #  'gallery', 
-            #  'living_room', 
-            #  'lost_empire', 
-            #  'room', 'suntemple',
+            'bedroom', 
+            'bistro', 
+             'crytek_sponza', 
+             'gallery', 
+             'living_room', 
+             'lost_empire', 
+             'room', 'suntemple',
             # 'sibenik',
-             'suntemple_statue' 
+            #  'suntemple_statue' 
              ]
     fps = 166
     resolution = 1080

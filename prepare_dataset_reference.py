@@ -3,7 +3,7 @@ import zipfile
 import random
 import shutil
 from pathlib import Path
-from utils import scene_velocity_dicts, VRRML
+from utils import scene_velocity_dicts, drop_JOD_dicts, VRRML
 
 
 
@@ -64,19 +64,23 @@ def rename_subfolders_for_scene(scene, velocity_dict, scene_folder, bitrates, de
 # all data are extracted from reference video
 if __name__ == "__main__":
     bitrates = [500, 1000, 1500, 2000]
-    reference_dir  = r'C:\Users\15142\Projects\VRR\Data\VRR_Patches\2025-01-15'
-    # reference_dir  = r'C:\Users\15142\Projects\VRR\Data\VRR_Patches\2024-10-10'
+
+    # titanium
+    # reference_dir  = r'D:\VRR_data\VRR_Patches\test_scenes64x64'
+    # dest_path = r'D:\VRR_data\VRRML\ML\test_scenes64x64'
+
+    reference_dir  = r'C:\Users\15142\Projects\VRR\Data\VRR_Patches\2025-01-30'
     dest_path = r'C:\Users\15142\Projects\VRR\Data\VRR_Patches\reference_new64'
     scene_arr = [
-            # 'bedroom', 
-            # 'bistro',
-            #  'crytek_sponza', 'gallery', 
-            #  'living_room', 
-            #  'lost_empire', 
-            #  'room', 
-            # 'suntemple', 
+            'bedroom', 
+            'bistro',
+             'crytek_sponza', 'gallery', 
+             'living_room', 
+             'lost_empire', 
+             'room', 
+            'suntemple', 
             #  'suntemple_statue',
-            'sibenik'
+            # 'sibenik'
              ]
     COPY = True # False True
     FRAMENUMBER_SHOW = True
@@ -86,5 +90,5 @@ if __name__ == "__main__":
     # scene_velocity_dicts = {'suntemple_statue': bistro_max_comb_per_sequence}
     for scene in scene_arr:
         scene_dir = f'{reference_dir}/reference_{scene}'
-        velocity_dict = scene_velocity_dicts[scene]
+        velocity_dict = drop_JOD_dicts[scene] # scene_velocity_dicts[scene]
         rename_subfolders_for_scene(scene, velocity_dict, scene_dir, bitrates, dest_path, MOVE=COPY)
