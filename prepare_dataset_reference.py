@@ -3,12 +3,7 @@ import zipfile
 import random
 import shutil
 from pathlib import Path
-from utils import scene_velocity_dicts, VRRML
-
-
-
-
-
+from utils_windows import scene_velocity_dicts, VRRML
 
 
 def rename_subfolders_for_scene(scene, velocity_dict, scene_folder, bitrates, dest_path, MOVE=False):
@@ -40,8 +35,13 @@ def rename_subfolders_for_scene(scene, velocity_dict, scene_folder, bitrates, de
             # with fps, resolution, velocity, bitrate
             for filename in os.listdir(sequence_path):
                 parts = filename.split("_")
+<<<<<<< Updated upstream
                 newfilename = f'{parts[0]}_166_1080_{bitrate}_{scene}_{sequence_name}_{parts[1]}' if not FRAMENUMBER_SHOW else \
                               f'{parts[0]}_166_1080_{bitrate}_{parts[1]}_{scene}_{sequence_name}_{parts[2]}'
+=======
+                # newfilename = f'{parts[0]}_166_1080_{bitrate}_{parts[1]}'
+                newfilename = f'{parts[0]}_166_1080_{bitrate}_{scene}_{sequence_name}_{parts[1]}'
+>>>>>>> Stashed changes
                 # print(f'filename {filename}')
                 # print(f'newfilename {newfilename}')
 
@@ -63,20 +63,21 @@ def rename_subfolders_for_scene(scene, velocity_dict, scene_folder, bitrates, de
 
 # all data are extracted from reference video
 if __name__ == "__main__":
-    bitrates = [500, 1000, 1500, 2000]
-    reference_dir  = r'C:\Users\15142\Projects\VRR\Data\VRR_Patches\2025-01-15'
-    # reference_dir  = r'C:\Users\15142\Projects\VRR\Data\VRR_Patches\2024-10-10'
-    dest_path = r'C:\Users\15142\Projects\VRR\Data\VRR_Patches\reference_new64'
+    # reference_dir  = r'C:\Users\15142\Projects\VRR\Data\VRR_Patches\2025-01-15'
+    # dest_path = r'C:\Users\15142\Projects\VRR\Data\VRR_Patches\reference_new64'
+
+    bitrates = [500,]
+    reference_dir  = r'D:\VRR_data\VRR_Patches\test_scenes64x64'
+    # dest_path = r'D:\VRR_data\VRR_Patches\reference128x128'
+    dest_path = r'D:\VRR_data\VRRML\ML\test_scenes64x64'
     scene_arr = [
-            # 'bedroom', 
-            # 'bistro',
+            # 'bedroom',
+            #  'bistro', 
             #  'crytek_sponza', 'gallery', 
-            #  'living_room', 
-            #  'lost_empire', 
-            #  'room', 
-            # 'suntemple', 
-            #  'suntemple_statue',
-            'sibenik'
+            #  'living_room', 'lost_empire', 
+            #  'room', 'suntemple', 
+            # 'sibenik'
+            'suntemple_statue'
              ]
     COPY = True # False True
     FRAMENUMBER_SHOW = True

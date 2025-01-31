@@ -1,13 +1,13 @@
 import os
 import shutil
-from utils import *
+from utils_windows import *
 
 
 
 def restructure_data(source_dir, destination_dir):
     # Traverse through each path_bitrate subfolder
     for root in os.listdir(source_dir):
-        print(f'\nroot {root}')
+        print(f'root {root}')
         last_part = os.path.basename(root)
         parts = last_part.split('_')
         res_target = int(parts[-3])
@@ -47,18 +47,11 @@ def restructure_data(source_dir, destination_dir):
 
 
 
-
-
-
-
-
-
-
 # categorize pngs to res_target x fps_target
 if __name__ == "__main__":
     COPY = True # True False
-    subfolder = 'ML_smaller'
-    type = 'validation'
+    subfolder = 'ML'
+    type = 'train'
     src_dir = f'{VRRML}/{subfolder}/{type}_bitratelabel'
     dest_dir = f'{VRRML}/{subfolder}/{type}_label'
     os.makedirs(dest_dir, exist_ok=True)

@@ -11,16 +11,16 @@ import matplotlib.pyplot as plt
 import subprocess
 
 
-# local pc
-CVVDPDIR = 'C:/Users/15142/Projects/ColorVideoVDP'
-VRRMP4 = r'C:\Users\15142\Projects\VRR\VRRMP4'
-VRRMP4_CVVDP = r'C:\Users\15142\Projects\VRR\VRRMP4_CVVDP'
-VRRDATA = r'C:\Users\15142\Projects\VRR\Data'
-VRR_Patches = f'{VRRDATA}/VRR_Patches'
-VRR_Motion = r'C:\Users\15142\Projects\VRR\VRR_Motion'
-VRRML = r'C:\Users\15142\Projects\VRR\Data\VRRML'
-VRRMP4_reference = r'C:\Users\15142\Projects\VRR\VRRMP4\uploaded\reference'
-CVVDP_EXCEL = r'C:\Users\15142\Projects\VRR\Data\VRR_Plot_HPC\data-500_1500_2000kbps' 
+# # local pc
+# CVVDPDIR = 'C:/Users/15142/Projects/ColorVideoVDP'
+# VRRMP4 = r'C:\Users\15142\Projects\VRR\VRRMP4'
+# VRRMP4_CVVDP = r'C:\Users\15142\Projects\VRR\VRRMP4_CVVDP'
+# VRRDATA = r'C:\Users\15142\Projects\VRR\Data'
+# VRR_Patches = f'{VRRDATA}/VRR_Patches'
+# VRR_Motion = r'C:\Users\15142\Projects\VRR\VRR_Motion'
+# VRRML = r'C:\Users\15142\Projects\VRR\Data\VRRML'
+# VRRMP4_reference = r'C:\Users\15142\Projects\VRR\VRRMP4\uploaded\reference'
+# CVVDP_EXCEL = r'C:\Users\15142\Projects\VRR\Data\VRR_Plot_HPC\data-500_1500_2000kbps' 
 
 # # HPC
 # # CVVDPDIR = 'C:/Users/15142/Projects/ColorVideoVDP'

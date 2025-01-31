@@ -3,10 +3,10 @@ import numpy as np
 import os
 import secrets
 import imageio
-from utils import *
+from utils_windows import *
 from PIL import Image
 import matplotlib.pyplot as plt
-from utils import *
+from utils_windows import *
 import datetime
 import random
 import torch

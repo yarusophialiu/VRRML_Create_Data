@@ -3,7 +3,7 @@ import numpy as np
 import os
 import shutil
 import secrets
-from utils import *
+from utils_windows import *
 import datetime
 import torch
 import torchvision.transforms as transforms
