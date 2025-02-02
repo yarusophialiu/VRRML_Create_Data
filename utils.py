@@ -10,6 +10,11 @@ from PIL import Image
 import matplotlib.pyplot as plt
 import subprocess
 
+# windows titanium
+VRRML = r'D:\VRR_data\VRRML'
+VRR_reference = r'D:\VRR_data\VRRMP4\reference'
+VRR_Patches = r'D:\VRR_data\VRR_Patches'
+VRR_Motion = r'D:\VRR\VRR_Motion'
 
 # # local pc
 # CVVDPDIR = 'C:/Users/15142/Projects/ColorVideoVDP'
