@@ -8,6 +8,7 @@ import subprocess
 import numpy as np
 from PIL import Image
 import matplotlib.pyplot as plt
+import torchvision.transforms as transforms
 import subprocess
 
 
@@ -110,6 +111,21 @@ def mapPathToId(path, seg, speed):
     id = (path-1) * 9 + (seg-1) * 3 + speed - 1
     print(f'id {id}')
     return id
+
+
+def save_or_show_image(input_image, path, format="png", SAVE=True, SHOW=False):
+    """
+    image is torch tensor
+    """
+    # Convert to PIL image for visualization
+    to_pil = transforms.ToPILImage()
+    image = to_pil(input_image)
+    if SAVE:
+        image.save(path, format)
+    if SHOW:
+        plt.imshow(image)
+        plt.axis("off")
+        plt.show()
 
 
 

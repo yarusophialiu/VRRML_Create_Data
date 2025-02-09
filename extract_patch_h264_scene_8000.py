@@ -39,6 +39,9 @@ def read_motion_vectors(file_path):
 
 
 def compute_velocity(patch, motion_vector_path):
+    """
+    postprocess motion patch cause we preprocess motion vector to make motion video.
+    """
     max_x, max_y = read_motion_vectors(motion_vector_path)
     # print(f'max_x, max_y {max_x, max_y}')
     pixel_precision = max(int(max_x) + 1, int(max_y) + 1)
@@ -171,6 +174,7 @@ def compute_per_bitrate(fps, resolution, path_name, total):
 # each id is 1 path_seg_speed, loop through all scenes given 1 id
 # extract from 8000kbps bitrate only, doenst contain jod
 # then run prepar_dataset_reference.py
+# extract patch and patch velocity
 if __name__ == "__main__":
     # parser = argparse.ArgumentParser(description='Process some integers.')
     # parser.add_argument('SLURM_ARRAY_TASK_ID', type=int, help='The id of task')
@@ -181,20 +185,20 @@ if __name__ == "__main__":
     # id = 1
 
     scenes = [
-            'bedroom', 
-            'bistro', 
-             'crytek_sponza', 
-             'gallery', 
-             'living_room', 
-             'lost_empire', 
-             'room', 'suntemple',
-            # 'sibenik',
-            #  'suntemple_statue' 
+            # 'bedroom', 
+            # 'bistro', 
+            #  'crytek_sponza', 
+            #  'gallery', 
+            #  'living_room', 
+            #  'lost_empire', 
+            #  'room', 'suntemple',
+            'sibenik',
+             'suntemple_statue' 
              ]
     fps = 166
     resolution = 1080
     SAVE = True # True, False
-    PATCH_SIZE = 64
+    PATCH_SIZE = 256
     FRAMENUMBER_SHOW = True
 
     for scene in scenes:
