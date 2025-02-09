@@ -72,8 +72,8 @@ if __name__ == "__main__":
     reference_dir  = r'C:\Users\15142\Projects\VRR\Data\VRR_Patches\2025-02-02'
     dest_path = r'C:\Users\15142\Projects\VRR\Data\VRR_Patches\reference_new64'
     scene_arr = [
-            # 'bedroom', 
-            # 'bistro',
+            # 'bedroom',
+            #  'bistro', 
             #  'crytek_sponza', 'gallery', 
             #  'living_room', 
             #  'lost_empire', 

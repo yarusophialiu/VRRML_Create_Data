@@ -3,8 +3,8 @@ import numpy as np
 import os
 import gc
 import secrets
-from utils import *
-from utils import *
+from utils_windows import *
+from utils_windows import *
 import datetime
 import argparse
 import torch

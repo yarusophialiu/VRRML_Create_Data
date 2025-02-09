@@ -1,25 +1,18 @@
 import shutil
 import os
-import imageio
-import numpy as np
-from utils import *
-from PIL import Image
-import matplotlib.pyplot as plt
-from utils import *
-
-import os
-import shutil
+from utils_windows import *
 import random  
 
 
 
 # create test data from training data whose subfolders are label
 if __name__ == "__main__":
-    BASE = r'C:\Users\15142\Projects\VRR\Data\VRR_Patches\reference_new128'
+    # BASE = r'C:\Users\15142\Projects\VRR\Data\VRR_Patches\reference_new128'
+    BASE = r'D:\VRR_data\VRR_Patches\reference128x128'
     train_folder = f'{BASE}/train'
     target_directory = f'{BASE}/test'
     os.makedirs(target_directory, exist_ok=True)
-    MOVE = True # False
+    MOVE = True # False True
     percent = 0.1
     count = 0
 

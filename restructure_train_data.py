@@ -1,11 +1,7 @@
 import os
 import random
 import shutil
-from utils import *
-
-
-
-
+from utils_windows import *
 
 
 def creat_new_train_dir(old_train_dir, new_train_dir):
@@ -46,12 +42,16 @@ def creat_new_train_dir(old_train_dir, new_train_dir):
                             # print(f'copied {num_patches} patches to {new_folder_path}')
 
 
-# create path_bitrate folders
+
 if __name__ == "__main__":
-    src_train_dir = f'{VRRML}/ML/test'
-    dest_train_dir = f'{VRRML}/ML/test_bitratelabel'
+    # src_train_dir = f'{VRRML}/ML/test'
+    # dest_train_dir = f'{VRRML}/ML/test_bitratelabel'
+
+    src_train_dir = f'{VRRML}/ML/validation'
+    dest_train_dir = f'{VRRML}/ML/validation_bitratelabel'
+
     os.makedirs(dest_train_dir, exist_ok=True)
-    num_patches = 20 # 200 for training data 
+    num_patches = 20 # 200 for training data, 20 for val and test
 
     COPY = True # False
     creat_new_train_dir(src_train_dir, dest_train_dir)

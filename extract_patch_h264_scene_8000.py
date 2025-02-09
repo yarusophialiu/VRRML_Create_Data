@@ -110,7 +110,7 @@ def generate_patches(base_dir, path_name, motion_vector_path, motion_video_path,
     output_dir bistro_path1_seg1_1
     """
     video_path = f'{base_dir}/{path_name}/ref166_1080/refOutput.mp4'
-    # print(f'video_path {video_path}')
+    print(f'video_path {video_path}')
     cap = cv2.VideoCapture(video_path)    
     if not cap.isOpened():
         print("Error opening video file")
@@ -183,7 +183,7 @@ if __name__ == "__main__":
     # id = args.SLURM_ARRAY_TASK_ID
     # scene = args.scene
     # id = 1
-
+   
     scenes = [
             # 'bedroom', 
             # 'bistro', 
@@ -195,6 +195,7 @@ if __name__ == "__main__":
             'sibenik',
              'suntemple_statue' 
              ]
+
     fps = 166
     resolution = 1080
     SAVE = True # True, False
@@ -205,16 +206,15 @@ if __name__ == "__main__":
         for id in range(1, 46):
             id -= 1
             path, seg, speed = mapIdToPath(id)
-            # print(f'path, seg, speed {path, seg, speed}')
+            print(f'path, seg, speed {path, seg, speed}')
 
             print(f'====================== scene {scene} ======================')
-            base_directory = f'{VRRMP4_reference}/reference_{scene}'
+            base_directory = f'{VRRMP4_reference}/{scene}'
             current_date = datetime.date.today()
             output_folder = f'{VRR_Patches}/{current_date}/reference_{scene}/{scene}_path{path}_seg{seg}_{speed}'
             os.makedirs(output_folder, exist_ok=True)
 
             path_name = f'{scene}_path{path}_seg{seg}_{speed}'
-            print(f'path_name {path_name}')
 
             total = 0
             motion_vector_path = f'{VRR_Motion}/reference/motion_vector_reference/{scene}/{scene}_path{path}_seg{seg}_{speed}_velocity_cleaned.txt'

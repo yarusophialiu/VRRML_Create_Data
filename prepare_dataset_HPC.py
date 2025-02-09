@@ -3,7 +3,7 @@ import zipfile
 import random
 import shutil
 from pathlib import Path
-from utils import scene_velocity_dicts, VRRML
+from utils_windows import scene_velocity_dicts, VRRML
 from create_train_data import rename_subfolders_for_scene
 
 
