@@ -3,7 +3,12 @@ import zipfile
 import random
 import shutil
 from pathlib import Path
-from utils_windows import scene_velocity_dicts, VRRML
+from utils import scene_velocity_dicts, drop_JOD_dicts, VRRML
+
+
+
+
+
 
 
 def rename_subfolders_for_scene(scene, velocity_dict, scene_folder, bitrates, dest_path, MOVE=False):
@@ -35,13 +40,8 @@ def rename_subfolders_for_scene(scene, velocity_dict, scene_folder, bitrates, de
             # with fps, resolution, velocity, bitrate
             for filename in os.listdir(sequence_path):
                 parts = filename.split("_")
-<<<<<<< Updated upstream
                 newfilename = f'{parts[0]}_166_1080_{bitrate}_{scene}_{sequence_name}_{parts[1]}' if not FRAMENUMBER_SHOW else \
                               f'{parts[0]}_166_1080_{bitrate}_{parts[1]}_{scene}_{sequence_name}_{parts[2]}'
-=======
-                # newfilename = f'{parts[0]}_166_1080_{bitrate}_{parts[1]}'
-                newfilename = f'{parts[0]}_166_1080_{bitrate}_{scene}_{sequence_name}_{parts[1]}'
->>>>>>> Stashed changes
                 # print(f'filename {filename}')
                 # print(f'newfilename {newfilename}')
 
@@ -63,29 +63,32 @@ def rename_subfolders_for_scene(scene, velocity_dict, scene_folder, bitrates, de
 
 # all data are extracted from reference video
 if __name__ == "__main__":
-    # reference_dir  = r'C:\Users\15142\Projects\VRR\Data\VRR_Patches\2025-01-15'
-    # dest_path = r'C:\Users\15142\Projects\VRR\Data\VRR_Patches\reference_new64'
+    bitrates = [500, 1000, 1500, 2000]
 
-    bitrates = [500,]
-    reference_dir  = r'D:\VRR_data\VRR_Patches\test_scenes64x64'
-    # dest_path = r'D:\VRR_data\VRR_Patches\reference128x128'
-    dest_path = r'D:\VRR_data\VRRML\ML\test_scenes64x64'
+    # titanium
+    reference_dir  = r'D:\VRR_data\VRR_Patches\test_scenes256x256'
+    dest_path = r'D:\VRR_data\VRRML\ML\test_scenes256x256'
+
+    # reference_dir  = r'C:\Users\15142\Projects\VRR\Data\VRR_Patches\2025-01-30'
+    # dest_path = r'C:\Users\15142\Projects\VRR\Data\VRR_Patches\reference_new64'
     scene_arr = [
-            # 'bedroom',
-            #  'bistro', 
-            #  'crytek_sponza', 'gallery', 
-            #  'living_room', 'lost_empire', 
-            #  'room', 'suntemple', 
-            # 'sibenik'
-            'suntemple_statue'
+            # 'bedroom', 
+            # 'bistro',
+            # 'crytek_sponza', 'gallery', 
+            # 'living_room', 
+            # 'lost_empire', 
+            # 'room', 
+            # 'suntemple', 
+             'suntemple_statue',
+            'sibenik'
              ]
     COPY = True # False True
-    FRAMENUMBER_SHOW = True
+    FRAMENUMBER_SHOW = False
     # bistro_max_comb_per_sequence = {'path1_seg1_1': [[30, 1080], [40, 1080], [50, 1080], [50, 1080]],} 
     #                                 # 'path1_seg1_2': [[70, 720], [80, 720], [80, 1080], [80, 1080]], 'path1_seg1_3': [[120, 480], [120, 720], [120, 720], [120, 720]], 'path1_seg2_1': [[50, 720], [70, 1080], [80, 1080], [80, 1080]], 'path1_seg2_2': [[110, 480], [120, 720], [120, 720], [120, 720]], 'path1_seg2_3': [[110, 480], [120, 720], [120, 720], [120, 720]], 'path1_seg3_1': [[50, 720], [50, 1080], [50, 1080], [60, 1080]], 'path1_seg3_2': [[80, 720], [90, 720], [110, 720], [110, 720]], 'path1_seg3_3': [[110, 720], [120, 720], [120, 720], [120, 720]], 'path2_seg1_1': [[60, 720], [80, 720], [80, 720], [80, 1080]], 'path2_seg1_2': [[90, 720], [110, 720], [120, 720], [120, 720]], 'path2_seg1_3': [[120, 480], [120, 720], [120, 720], [120, 720]], 'path2_seg2_1': [[60, 720], [80, 720], [80, 1080], [80, 1080]], 'path2_seg2_2': [[90, 480], [110, 720], [120, 720], [120, 720]], 'path2_seg2_3': [[120, 360], [120, 480], [120, 480], [120, 720]], 'path2_seg3_1': [[40, 720], [50, 1080], [60, 1080], [60, 1080]], 'path2_seg3_2': [[80, 720], [90, 720], [110, 720], [120, 720]], 'path2_seg3_3': [[110, 480], [120, 720], [120, 720], [120, 720]], 'path3_seg1_1': [[90, 720], [100, 720], [110, 720], [120, 720]], 'path3_seg1_2': [[80, 480], [110, 720], [120, 720], [120, 720]], 'path3_seg1_3': [[120, 480], [120, 720], [120, 720], [120, 720]], 'path3_seg2_1': [[80, 720], [90, 720], [110, 720], [110, 720]], 'path3_seg2_2': [[80, 720], [100, 720], [110, 720], [120, 720]], 'path3_seg2_3': [[80, 480], [110, 720], [120, 720], [120, 720]], 'path3_seg3_1': [[80, 720], [90, 720], [110, 720], [120, 1080]], 'path3_seg3_2': [[110, 480], [120, 720], [120, 720], [120, 720]], 'path3_seg3_3': [[120, 480], [120, 480], [120, 480], [120, 720]], 'path4_seg1_1': [[80, 720], [110, 720], [120, 720], [120, 720]], 'path4_seg1_2': [[110, 480], [120, 720], [120, 720], [120, 720]], 'path4_seg1_3': [[120, 720], [120, 720], [120, 720], [120, 720]], 'path4_seg2_1': [[80, 720], [110, 720], [120, 720], [120, 720]], 'path4_seg2_2': [[110, 480], [120, 720], [120, 720], [120, 720]], 'path4_seg2_3': [[110, 720], [120, 720], [120, 720], [120, 720]], 'path4_seg3_1': [[120, 480], [120, 720], [120, 720], [120, 720]], 'path4_seg3_2': [[120, 480], [120, 720], [120, 720], [120, 720]], 'path4_seg3_3': [[120, 360], [120, 480], [120, 480], [120, 480]], 'path5_seg1_1': [[80, 720], [80, 720], [110, 720], [110, 720]], 'path5_seg1_2': [[80, 720], [110, 720], [120, 720], [120, 720]], 'path5_seg1_3': [[90, 720], [120, 720], [120, 720], [120, 720]], 'path5_seg2_1': [[80, 720], [90, 720], [120, 720], [120, 720]], 'path5_seg2_2': [[80, 720], [120, 720], [120, 720], [120, 720]], 'path5_seg2_3': [[120, 480], [120, 720], [120, 720], [120, 720]], 'path5_seg3_1': [[120, 720], [120, 720], [120, 720], [120, 720]], 'path5_seg3_2': [[120, 480], [120, 720], [120, 720], [120, 720]], 'path5_seg3_3': [[120, 480], [120, 720], [120, 720], [120, 720]]}
 
     # scene_velocity_dicts = {'suntemple_statue': bistro_max_comb_per_sequence}
     for scene in scene_arr:
         scene_dir = f'{reference_dir}/reference_{scene}'
-        velocity_dict = scene_velocity_dicts[scene]
+        velocity_dict = scene_velocity_dicts[scene] # drop_JOD_dicts[scene] scene_velocity_dicts[scene]
         rename_subfolders_for_scene(scene, velocity_dict, scene_dir, bitrates, dest_path, MOVE=COPY)
