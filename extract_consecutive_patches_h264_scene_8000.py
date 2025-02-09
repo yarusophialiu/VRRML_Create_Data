@@ -9,12 +9,15 @@ import torch
 import torchvision.transforms as transforms
 
 
-def get_random_patch(width, height, patch_size, interpolated_img):
-    max_x = width - patch_size[1]
-    max_y = height - patch_size[0]
-    x = np.random.randint(0, max_x + 1) 
-    y = np.random.randint(0, max_y + 1)
-    # print(f'x, y {x, y}')
+def get_random_patch(width, height, patch_size, interpolated_img, PX=None, PY=None):
+    if (not PX) or (not PY):
+        max_x = width - patch_size[1]
+        max_y = height - patch_size[0]
+        x = np.random.randint(0, max_x + 1) 
+        y = np.random.randint(0, max_y + 1)
+    else:
+        x = PX
+        y = PY
 
     interpolated_patch = interpolated_img[:, y:y+patch_size[0], x:x+patch_size[1]]
     return interpolated_patch, x, y
@@ -102,6 +105,13 @@ def find_motion_patch_h265(video_path, dec_fps, fps, dec_frame_number, px, py, p
 
     return patch
 
+def concatenate_images(img1, img2):
+        concatenated_patches = torch.cat((img1, img2), dim=2)  # dim=2 for width
+        # show_patch(concatenated_patches.permute(1, 2, 0)) # 3, 128, 256 if patch size 128
+        to_pil = transforms.ToPILImage()
+        concatenated_patches = to_pil(concatenated_patches)
+        return concatenated_patches
+
 
 def generate_patches(base_dir, path_name, motion_vector_path, motion_video_path, frame_indices, patch_size=(64, 64), output_dir="output", scene=None):
     """
@@ -110,13 +120,14 @@ def generate_patches(base_dir, path_name, motion_vector_path, motion_video_path,
     output_dir bistro_path1_seg1_1
     """
     video_path = f'{base_dir}/{path_name}/ref166_1080/refOutput.mp4'
-    print(f'video_path {video_path}')
+    # print(f'video_path {video_path}')
     cap = cv2.VideoCapture(video_path)    
     if not cap.isOpened():
         print("Error opening video file")
         return
     frame_generated = 0
     frame_number = 0 # decoded video frame index that will be passed to find_motion_patch_h265
+    prev_frame = None
     while cap.isOpened(): # Read until video is completed
         if frame_number not in frame_indices:
             frame_number += 1
@@ -125,34 +136,36 @@ def generate_patches(base_dir, path_name, motion_vector_path, motion_video_path,
                 continue
             else:
                 break
+        # print(f'============== frame {frame_number} ==============')
         ret, frame = cap.read() # frame (360, 640, 3)
         if not ret: # If frame is read correctly ret is True
             break
         frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         frame = torch.from_numpy(frame).permute(2, 0, 1) # 3, 360, 640
+        if frame_number == 0:
+            prev_frame = frame
+            frame_number += 1
+            continue
         # print(f'frame_number {frame_number}, frame.shape {frame.shape}')
         # show_patch(frame.permute(1,2,0)) # permute(1,2,0) gives 360, 640, 3, OpenCV reads images in BGR, so see blue-tinted image
         height, width = 1080, 1920
         interpolated_patch, px, py = get_random_patch(width, height, patch_size, frame)
-        # print(f'interpolated_patch {interpolated_patch.size()}') # [3, 1080, 1080])
+        interpolated_prev_patch, px, py = get_random_patch(width, height, patch_size, prev_frame, PX=px, PY=py)
+        # show_patch(interpolated_patch.permute(1,2,0))
+        
+        concatenated_patches = concatenate_images(interpolated_prev_patch, interpolated_patch) # 3, 128, 256 if patch size 128
 
         motion_patch = find_motion_patch_h265(motion_video_path, fps, 166, frame_number, px, py, patch_size=patch_size)
         velocity = compute_velocity(motion_patch, motion_vector_path)
-        # print(f'velocity {velocity}')
-        # show_patch(interpolated_patch.permute(1,2,0))
 
         hex_unique_id = secrets.token_hex(4)
         # path = f'{output_folder}/{hex_unique_id}_{frame_index}_{fps}_{resolution}_{bitrate}.png'
         path = f'{output_dir}/{hex_unique_id}_{int(velocity*1000)}.png' if not FRAMENUMBER_SHOW else f'{output_dir}/{hex_unique_id}_{frame_number}_{int(velocity*1000)}.png'
         if SAVE:
-            to_pil = transforms.ToPILImage()
-            interpolated_patch = to_pil(interpolated_patch)
-            interpolated_patch.save(path, "png")
+            concatenated_patches.save(path, "png")
         frame_generated += 1
         frame_number += 1
-        
-        # if frame_number >= 10:
-        #     break
+        # print(f'framenumber {frame_number}')
     cap.release() # When everything done, release the video capture object
     return frame_generated
 
@@ -183,7 +196,7 @@ if __name__ == "__main__":
     # id = args.SLURM_ARRAY_TASK_ID
     # scene = args.scene
     # id = 1
-   
+
     scenes = [
             # 'bedroom', 
             # 'bistro', 
@@ -193,28 +206,28 @@ if __name__ == "__main__":
             #  'lost_empire', 
             #  'room', 'suntemple',
             'sibenik',
-             'suntemple_statue' 
+            #  'suntemple_statue' 
              ]
-
     fps = 166
     resolution = 1080
     SAVE = True # True, False
-    PATCH_SIZE = 256
+    PATCH_SIZE = 64
     FRAMENUMBER_SHOW = True
 
     for scene in scenes:
         for id in range(1, 46):
             id -= 1
             path, seg, speed = mapIdToPath(id)
-            print(f'path, seg, speed {path, seg, speed}')
+            # print(f'path, seg, speed {path, seg, speed}')
 
             print(f'====================== scene {scene} ======================')
-            base_directory = f'{VRRMP4_reference}/{scene}'
+            base_directory = f'{VRRMP4_reference}/reference_{scene}'
             current_date = datetime.date.today()
             output_folder = f'{VRR_Patches}/{current_date}/reference_{scene}/{scene}_path{path}_seg{seg}_{speed}'
             os.makedirs(output_folder, exist_ok=True)
 
             path_name = f'{scene}_path{path}_seg{seg}_{speed}'
+            print(f'path_name {path_name}')
 
             total = 0
             motion_vector_path = f'{VRR_Motion}/reference/motion_vector_reference/{scene}/{scene}_path{path}_seg{seg}_{speed}_velocity_cleaned.txt'

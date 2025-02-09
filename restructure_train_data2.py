@@ -1,6 +1,6 @@
 import os
 import shutil
-from utils_windows import *
+from utils import *
 
 
 
@@ -47,11 +47,13 @@ def restructure_data(source_dir, destination_dir):
 
 
 
+
+
 # categorize pngs to res_target x fps_target
 if __name__ == "__main__":
-    COPY = True # True False
-    subfolder = 'ML'
-    type = 'train'
+    COPY = False # True False
+    subfolder = 'ML_smaller'
+    type = 'validation'
     src_dir = f'{VRRML}/{subfolder}/{type}_bitratelabel'
     dest_dir = f'{VRRML}/{subfolder}/{type}_label'
     os.makedirs(dest_dir, exist_ok=True)
