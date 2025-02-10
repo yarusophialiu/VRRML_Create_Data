@@ -150,9 +150,12 @@ def generate_patches(base_dir, path_name, motion_vector_path, motion_video_path,
         # show_patch(frame.permute(1,2,0)) # permute(1,2,0) gives 360, 640, 3, OpenCV reads images in BGR, so see blue-tinted image
         height, width = 1080, 1920
         interpolated_patch, px, py = get_random_patch(width, height, patch_size, frame)
+        # print(f'interpolated_patch {px, py}')
         interpolated_prev_patch, px, py = get_random_patch(width, height, patch_size, prev_frame, PX=px, PY=py)
+        # print(f'interpolated_prev_patch {px, py}')
         # show_patch(interpolated_patch.permute(1,2,0))
-        
+        # show_patch(interpolated_prev_patch.permute(1,2,0))
+
         concatenated_patches = concatenate_images(interpolated_prev_patch, interpolated_patch) # 3, 128, 256 if patch size 128
 
         motion_patch = find_motion_patch_h265(motion_video_path, fps, 166, frame_number, px, py, patch_size=patch_size)
@@ -165,6 +168,7 @@ def generate_patches(base_dir, path_name, motion_vector_path, motion_video_path,
             concatenated_patches.save(path, "png")
         frame_generated += 1
         frame_number += 1
+        prev_frame = frame
         # print(f'framenumber {frame_number}')
     cap.release() # When everything done, release the video capture object
     return frame_generated
@@ -198,15 +202,16 @@ if __name__ == "__main__":
     # id = 1
 
     scenes = [
-            # 'bedroom', 
+            'bedroom', 
             # 'bistro', 
             #  'crytek_sponza', 
             #  'gallery', 
             #  'living_room', 
             #  'lost_empire', 
-            #  'room', 'suntemple',
-            'sibenik',
-            #  'suntemple_statue' 
+            #  'room', 
+            # 'suntemple',
+            # 'sibenik',
+            # 'suntemple_statue' 
              ]
     fps = 166
     resolution = 1080
@@ -215,7 +220,7 @@ if __name__ == "__main__":
     FRAMENUMBER_SHOW = True
 
     for scene in scenes:
-        for id in range(1, 46):
+        for id in range(1, 46): # 46
             id -= 1
             path, seg, speed = mapIdToPath(id)
             # print(f'path, seg, speed {path, seg, speed}')
