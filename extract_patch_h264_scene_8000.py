@@ -7,6 +7,7 @@ import datetime
 import argparse
 import torch
 import torchvision.transforms as transforms
+from prepare_dataset_reference import rename_subfolders_for_scene
 
 
 def get_random_patch(width, height, patch_size, interpolated_img):
@@ -201,12 +202,12 @@ if __name__ == "__main__":
    
     scenes = [
             'bedroom', 
-            'bistro', 
-             'crytek_sponza', 
-             'gallery', 
-             'living_room', 
-             'lost_empire', 
-             'room', 'suntemple',
+            # 'bistro', 
+            #  'crytek_sponza', 
+            #  'gallery', 
+            #  'living_room', 
+            #  'lost_empire', 
+            #  'room', 'suntemple',
             # 'sibenik',
             #  'suntemple_statue' 
              ]
@@ -219,23 +220,42 @@ if __name__ == "__main__":
     FRAME_VELOCITY = True
     PATCH_VELOCITY = False
 
-    for scene in scenes:
-        for id in range(1, 46): # 46
-            id -= 1
-            path, seg, speed = mapIdToPath(id)
-            print(f'path, seg, speed {path, seg, speed}')
+    EXTRACT_PATCH = True 
+    LABEL_DATA = True 
+    
+    current_date = datetime.date.today()
+    output_parent_folder = f'{VRR_Patches}/{current_date}_patch{PATCH_SIZE}x{PATCH_SIZE}'
 
-            print(f'====================== scene {scene} ======================')
-            base_directory = f'{VRRMP4_reference}/{scene}'
-            current_date = datetime.date.today()
-            output_folder = f'{VRR_Patches}/{current_date}/reference_{scene}/{scene}_path{path}_seg{seg}_{speed}'
-            frame_velocity_path = f'{VRR_Motion}/reference/magnitude_motion_per_frame/{scene}/{scene}_path{path}_seg{seg}_{speed}_velocity_per_frame.txt'
-            os.makedirs(output_folder, exist_ok=True)
+    if EXTRACT_PATCH:
+        for scene in scenes:
+            for id in range(1, 2): # 46
+                id -= 1
+                path, seg, speed = mapIdToPath(id)
+                print(f'path, seg, speed {path, seg, speed}')
+                print(f'====================== scene {scene} ======================')
+                base_directory = f'{VRRMP4_reference}/{scene}'
+                current_date = datetime.date.today()
+                output_folder = f'{output_parent_folder}/reference_{scene}/{scene}_path{path}_seg{seg}_{speed}'
+                frame_velocity_path = f'{VRR_Motion}/reference/magnitude_motion_per_frame/{scene}/{scene}_path{path}_seg{seg}_{speed}_velocity_per_frame.txt'
+                os.makedirs(output_folder, exist_ok=True)
 
-            path_name = f'{scene}_path{path}_seg{seg}_{speed}'
+                path_name = f'{scene}_path{path}_seg{seg}_{speed}'
 
-            total = 0
-            motion_vector_path = f'{VRR_Motion}/reference/motion_vector_reference/{scene}/{scene}_path{path}_seg{seg}_{speed}_velocity_cleaned.txt'
-            motion_video_path = f'{VRR_Motion}/reference/refMP4_reference/{scene}/{scene}_path{path}_seg{seg}_{speed}_refOutput_166_1080_8000.mp4'
-            compute_per_bitrate(fps, resolution, path_name, frame_velocity_path, total)
-    print(f'Patches generated to {VRR_Patches}/{current_date}')
+                total = 0
+                motion_vector_path = f'{VRR_Motion}/reference/motion_vector_reference/{scene}/{scene}_path{path}_seg{seg}_{speed}_velocity_cleaned.txt'
+                motion_video_path = f'{VRR_Motion}/reference/refMP4_reference/{scene}/{scene}_path{path}_seg{seg}_{speed}_refOutput_166_1080_8000.mp4'
+                compute_per_bitrate(fps, resolution, path_name, frame_velocity_path, total)
+    
+    if LABEL_DATA:
+        bitrates = [500, 1000, 1500, 2000]
+        dest_path = f'{output_parent_folder}_labeled_data'
+
+        COPY = True # False True
+        FRAMENUMBER_SHOW = True
+
+        # scene_velocity_dicts = {'suntemple_statue': bistro_max_comb_per_sequence}
+        for scene in scene_arr:
+            scene_dir = f'{output_parent_folder}/reference_{scene}'
+            velocity_dict = scene_velocity_dicts[scene] # scene_velocity_dicts[scene] dropJOD
+            rename_subfolders_for_scene(scene, velocity_dict, scene_dir, bitrates, dest_path, MOVE=COPY, FRAMENUMBER_SHOW=FRAMENUMBER_SHOW)
+        print(f'labeled data are saved to {dest_path}')
