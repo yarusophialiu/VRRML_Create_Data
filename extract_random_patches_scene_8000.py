@@ -137,7 +137,6 @@ def generate_patches(base_dir, path_name, motion_vector_path, motion_video_path,
         return
     frame_generated = 0
     frame_number = 0 # decoded video frame index that will be passed to find_motion_patch_h265
-    prev_frame = None
     while cap.isOpened(): # Read until video is completed
         if frame_number not in frame_indices:
             frame_number += 1
@@ -153,25 +152,22 @@ def generate_patches(base_dir, path_name, motion_vector_path, motion_video_path,
         frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         frame = torch.from_numpy(frame).permute(2, 0, 1) # 3, 360, 640
         if frame_number == 0:
-            prev_frame = frame
             frame_number += 1
             continue
         # print(f'frame_number {frame_number}, frame.shape {frame.shape}')
         # show_patch(frame.permute(1,2,0)) # permute(1,2,0) gives 360, 640, 3, OpenCV reads images in BGR, so see blue-tinted image
         height, width = 1080, 1920
-        interpolated_patch, px, py = get_random_patch(width, height, patch_size, frame)
-        # print(f'interpolated_patch {px, py}')
-        interpolated_prev_patch, px, py = get_random_patch(width, height, patch_size, prev_frame, PX=px, PY=py)
-        # print(f'interpolated_prev_patch {px, py}')
+        interpolated_patch1, px1, py1 = get_random_patch(width, height, patch_size, frame)
+        interpolated_patch2, px2, py2 = get_random_patch(width, height, patch_size, frame)
         # show_patch(interpolated_patch.permute(1,2,0))
         # show_patch(interpolated_prev_patch.permute(1,2,0))
 
-        concatenated_patches = concatenate_images(interpolated_prev_patch, interpolated_patch) # 3, 128, 256 if patch size 128
+        concatenated_patches = concatenate_images(interpolated_patch1, interpolated_patch2) # 3, 128, 256 if patch size 128
         if FRAME_VELOCITY:
             velocity = read_frame_velocity(frame_velocity_path, frame_number)
             # print(f'velocity {velocity}')
         if PATCH_VELOCITY:
-            motion_patch = find_motion_patch_h265(motion_video_path, fps, 166, frame_number, px, py, patch_size=patch_size)
+            motion_patch = find_motion_patch_h265(motion_video_path, fps, 166, frame_number, px1, py1, patch_size=patch_size)
             velocity = compute_velocity(motion_patch, motion_vector_path)
         
         if velocity is None:
@@ -186,7 +182,6 @@ def generate_patches(base_dir, path_name, motion_vector_path, motion_video_path,
             concatenated_patches.save(path, "png")
         frame_generated += 1
         frame_number += 1
-        prev_frame = frame
         # print(f'framenumber {frame_number}')
     cap.release() # When everything done, release the video capture object
     return frame_generated
@@ -248,7 +243,7 @@ if __name__ == "__main__":
             print(f'====================== scene {scene} ======================')
             base_directory = f'{VRRMP4_reference}/{scene}'
             current_date = datetime.date.today()
-            output_folder = f'{VRR_Patches}/{current_date}_consecutive_patches/reference_{scene}/{scene}_path{path}_seg{seg}_{speed}'
+            output_folder = f'{VRR_Patches}/{current_date}_random_patches/reference_{scene}/{scene}_path{path}_seg{seg}_{speed}'
             frame_velocity_path = f'{VRR_Motion}/reference/magnitude_motion_per_frame/{scene}/{scene}_path{path}_seg{seg}_{speed}_velocity_per_frame.txt'
             os.makedirs(output_folder, exist_ok=True)
 
