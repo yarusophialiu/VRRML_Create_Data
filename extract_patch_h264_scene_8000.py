@@ -102,15 +102,23 @@ def find_motion_patch_h265(video_path, dec_fps, fps, dec_frame_number, px, py, p
 
     return patch
 
+def read_frame_velocity(frame_velocity_path, frame_number):
+    with open(frame_velocity_path, "r") as file:
+        for line in file:
+            frame, velocity = line.split()
+            if int(frame) == frame_number:
+                return float(velocity)
+        return None  # Return None if frame_number is not found
 
-def generate_patches(base_dir, path_name, motion_vector_path, motion_video_path, frame_indices, patch_size=(64, 64), output_dir="output", scene=None):
+
+def generate_patches(base_dir, path_name, motion_vector_path, motion_video_path, frame_indices, frame_velocity_path, patch_size=(64, 64), output_dir="output", scene=None):
     """
     base_dir, e.g. VRRMP4/uploaded/reference_bistro/
     bistro_path1_seg1_1/ref166_1080
     output_dir bistro_path1_seg1_1
     """
     video_path = f'{base_dir}/{path_name}/ref166_1080/refOutput.mp4'
-    print(f'video_path {video_path}')
+    # print(f'video_path {video_path}')
     cap = cv2.VideoCapture(video_path)    
     if not cap.isOpened():
         print("Error opening video file")
@@ -135,11 +143,18 @@ def generate_patches(base_dir, path_name, motion_vector_path, motion_video_path,
         height, width = 1080, 1920
         interpolated_patch, px, py = get_random_patch(width, height, patch_size, frame)
         # print(f'interpolated_patch {interpolated_patch.size()}') # [3, 1080, 1080])
-
-        motion_patch = find_motion_patch_h265(motion_video_path, fps, 166, frame_number, px, py, patch_size=patch_size)
-        velocity = compute_velocity(motion_patch, motion_vector_path)
-        # print(f'velocity {velocity}')
-        # show_patch(interpolated_patch.permute(1,2,0))
+        if FRAME_VELOCITY:
+            velocity = read_frame_velocity(frame_velocity_path, frame_number)
+            # print(f'velocity {velocity}')
+        if PATCH_VELOCITY:
+            motion_patch = find_motion_patch_h265(motion_video_path, fps, 166, frame_number, px, py, patch_size=patch_size)
+            velocity = compute_velocity(motion_patch, motion_vector_path)
+            # print(f'velocity {velocity}')
+            # show_patch(interpolated_patch.permute(1,2,0))
+        if velocity is None:
+            frame_generated += 1
+            frame_number += 1
+            continue
 
         hex_unique_id = secrets.token_hex(4)
         # path = f'{output_folder}/{hex_unique_id}_{frame_index}_{fps}_{resolution}_{bitrate}.png'
@@ -157,18 +172,18 @@ def generate_patches(base_dir, path_name, motion_vector_path, motion_video_path,
     return frame_generated
 
 
-def compute_per_bitrate(fps, resolution, path_name, total):
+def compute_per_bitrate(fps, resolution, path_name, frame_velocity_path, total):
     print(f'====================== fps, resolution {fps, resolution}, {path_name} ======================')
     frame_created_per_fps_video = 276 # frame_per_fps_video(fps) # how many frames does this fps video have
     # print(f'frame_created_per_fps_video {frame_created_per_fps_video}')
     frame_indices = [i for i in range(276)]
     count = 0 # count total number of patches generated for the fps
     patch_generated = generate_patches(base_directory, path_name, motion_vector_path, motion_video_path, \
-                                    frame_indices, output_dir=output_folder, scene=scene, patch_size=(PATCH_SIZE, PATCH_SIZE))
+                                    frame_indices, frame_velocity_path, output_dir=output_folder, scene=scene, patch_size=(PATCH_SIZE, PATCH_SIZE))
     print(f'{patch_generated} patches generated for resolution {resolution}p')
     count += patch_generated
     total += count
-    print(f'total {total}, {count} data generated')
+    print(f'total {total}, {count} data generated to {VRR_Patches}/{current_date}')
 
 
 # each id is 1 path_seg_speed, loop through all scenes given 1 id
@@ -185,25 +200,27 @@ if __name__ == "__main__":
     # id = 1
    
     scenes = [
-            # 'bedroom', 
-            # 'bistro', 
-            #  'crytek_sponza', 
-            #  'gallery', 
-            #  'living_room', 
-            #  'lost_empire', 
-            #  'room', 'suntemple',
-            'sibenik',
-             'suntemple_statue' 
+            'bedroom', 
+            'bistro', 
+             'crytek_sponza', 
+             'gallery', 
+             'living_room', 
+             'lost_empire', 
+             'room', 'suntemple',
+            # 'sibenik',
+            #  'suntemple_statue' 
              ]
 
     fps = 166
     resolution = 1080
     SAVE = True # True, False
-    PATCH_SIZE = 256
+    PATCH_SIZE = 64
     FRAMENUMBER_SHOW = True
+    FRAME_VELOCITY = True
+    PATCH_VELOCITY = False
 
     for scene in scenes:
-        for id in range(1, 46):
+        for id in range(1, 2): # 46
             id -= 1
             path, seg, speed = mapIdToPath(id)
             print(f'path, seg, speed {path, seg, speed}')
@@ -212,6 +229,7 @@ if __name__ == "__main__":
             base_directory = f'{VRRMP4_reference}/{scene}'
             current_date = datetime.date.today()
             output_folder = f'{VRR_Patches}/{current_date}/reference_{scene}/{scene}_path{path}_seg{seg}_{speed}'
+            frame_velocity_path = f'{VRR_Motion}/reference/magnitude_motion_per_frame/{scene}/{scene}_path{path}_seg{seg}_{speed}_velocity_per_frame.txt'
             os.makedirs(output_folder, exist_ok=True)
 
             path_name = f'{scene}_path{path}_seg{seg}_{speed}'
@@ -219,4 +237,4 @@ if __name__ == "__main__":
             total = 0
             motion_vector_path = f'{VRR_Motion}/reference/motion_vector_reference/{scene}/{scene}_path{path}_seg{seg}_{speed}_velocity_cleaned.txt'
             motion_video_path = f'{VRR_Motion}/reference/refMP4_reference/{scene}/{scene}_path{path}_seg{seg}_{speed}_refOutput_166_1080_8000.mp4'
-            compute_per_bitrate(fps, resolution, path_name, total)
+            compute_per_bitrate(fps, resolution, path_name, frame_velocity_path, total)
