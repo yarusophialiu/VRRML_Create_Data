@@ -183,7 +183,7 @@ def compute_per_bitrate(fps, resolution, path_name, frame_velocity_path, total):
     print(f'{patch_generated} patches generated for resolution {resolution}p')
     count += patch_generated
     total += count
-    print(f'total {total}, {count} data generated to {VRR_Patches}/{current_date}')
+    print(f'total {total}, {count} data')
 
 
 # each id is 1 path_seg_speed, loop through all scenes given 1 id
@@ -220,7 +220,7 @@ if __name__ == "__main__":
     PATCH_VELOCITY = False
 
     for scene in scenes:
-        for id in range(1, 2): # 46
+        for id in range(1, 46): # 46
             id -= 1
             path, seg, speed = mapIdToPath(id)
             print(f'path, seg, speed {path, seg, speed}')
@@ -238,3 +238,4 @@ if __name__ == "__main__":
             motion_vector_path = f'{VRR_Motion}/reference/motion_vector_reference/{scene}/{scene}_path{path}_seg{seg}_{speed}_velocity_cleaned.txt'
             motion_video_path = f'{VRR_Motion}/reference/refMP4_reference/{scene}/{scene}_path{path}_seg{seg}_{speed}_refOutput_166_1080_8000.mp4'
             compute_per_bitrate(fps, resolution, path_name, frame_velocity_path, total)
+    print(f'Patches generated to {VRR_Patches}/{current_date}')
