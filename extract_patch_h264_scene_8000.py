@@ -255,6 +255,10 @@ if __name__ == "__main__":
 
         # scene_velocity_dicts = {'suntemple_statue': bistro_max_comb_per_sequence}
         for scene in scene_arr:
+            if not os.path.exists(output_parent_folder):
+                print(f"Folder '{output_parent_folder}' does not exist. Exiting...")
+                exit()  # Stop the script execution
+                
             scene_dir = f'{output_parent_folder}/reference_{scene}'
             velocity_dict = scene_velocity_dicts[scene] # scene_velocity_dicts[scene] dropJOD
             rename_subfolders_for_scene(scene, velocity_dict, scene_dir, bitrates, dest_path, MOVE=COPY, FRAMENUMBER_SHOW=FRAMENUMBER_SHOW)
