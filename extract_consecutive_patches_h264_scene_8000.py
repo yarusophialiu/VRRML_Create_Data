@@ -240,7 +240,7 @@ if __name__ == "__main__":
     FRAME_VELOCITY = True
     PATCH_VELOCITY = False
     
-    EXTRACT_PATCH = False 
+    EXTRACT_PATCH = True 
     LABEL_DATA = True 
     
     current_date = datetime.date.today()
@@ -269,23 +269,15 @@ if __name__ == "__main__":
 
     if LABEL_DATA:
         bitrates = [500, 1000, 1500, 2000]
-        dest_path = f'{VRR_Patches}/{current_date}_consecutive_patches_labeled_data'
-        scene_arr = [
-                'bedroom',
-                #  'bistro', 
-                #  'crytek_sponza', 'gallery', 
-                #  'living_room', 
-                #  'lost_empire', 
-                #  'room', 
-                # 'suntemple', 
-                # 'suntemple_statue',
-                # 'sibenik'
-                ]
+        dest_path = f'{output_parent_folder}_labeled_data'
         COPY = True # False True
         FRAMENUMBER_SHOW = True
 
         # scene_velocity_dicts = {'suntemple_statue': bistro_max_comb_per_sequence}
         for scene in scene_arr:
+            if not os.path.exists(output_parent_folder):
+                print(f"Folder '{output_parent_folder}' does not exist. Exiting...")
+                exit()  # Stop the script execution
             scene_dir = f'{output_parent_folder}/reference_{scene}'
             velocity_dict = scene_velocity_dicts[scene] # scene_velocity_dicts[scene]
             rename_subfolders_for_scene(scene, velocity_dict, scene_dir, bitrates, dest_path, MOVE=COPY, FRAMENUMBER_SHOW=FRAMENUMBER_SHOW)

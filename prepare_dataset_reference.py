@@ -7,23 +7,19 @@ from utils import scene_velocity_dicts, drop_JOD_dicts, VRRML
 
 
 
-
-
-
-
-def rename_subfolders_for_scene(scene, velocity_dict, scene_folder, bitrates, dest_path, MOVE=False):
-    print(f'scene_folder {scene_folder}')
+def rename_subfolders_for_scene(scene, velocity_dict, scene_folder, bitrates, dest_path, MOVE=False, FRAMENUMBER_SHOW=False):
+    # print(f'scene_folder {scene_folder}')
     if not os.path.exists(scene_folder):
-        print(f"Scene folder '{scene_folder}' does not exist. Skipping.")
+        # print(f"Scene folder '{scene_folder}' does not exist. Skipping.")
         return
     
     count = 0
     for sequence_name, params_list in velocity_dict.items(): # bistro_path1_seg1_1: [[xxx], [xxx], [xxx]]
         sequence_path = f'{scene_folder}/{scene}_{sequence_name}'
-        print(f'path folder {scene}_{sequence_name}')
+        # print(f'path folder {scene}_{sequence_name}')
         # print(f'sequence_path {sequence_path}')
         if not os.path.exists(sequence_path):
-            print(f"Folder '{sequence_path}' does not exist. Skipping.")
+            # print(f"Folder '{sequence_path}' does not exist. Skipping.")
             continue
             
         for i, bitrate in enumerate(bitrates):
@@ -69,8 +65,8 @@ if __name__ == "__main__":
     # reference_dir  = r'D:\VRR_data\VRR_Patches\test_scenes64x64'
     # dest_path = r'D:\VRR_data\VRRML\ML\test_scenes64x64'
 
-    reference_dir  = r'C:\Users\15142\Projects\VRR\Data\VRR_Patches\2025-02-02'
-    dest_path = r'C:\Users\15142\Projects\VRR\Data\VRR_Patches\reference_new64'
+    reference_dir  = r'C:\Users\15142\Projects\VRR\Data\VRR_Patches\2025-02-10'
+    dest_path = r'C:\Users\15142\Projects\VRR\Data\VRR_Patches\test_consecutive_patches64x64_'
     scene_arr = [
             # 'bedroom',
             #  'bistro', 
@@ -90,5 +86,5 @@ if __name__ == "__main__":
     # scene_velocity_dicts = {'suntemple_statue': bistro_max_comb_per_sequence}
     for scene in scene_arr:
         scene_dir = f'{reference_dir}/reference_{scene}'
-        velocity_dict = drop_JOD_dicts[scene] # scene_velocity_dicts[scene]
+        # velocity_dict = drop_JOD_dicts[scene] # scene_velocity_dicts[scene]
         rename_subfolders_for_scene(scene, velocity_dict, scene_dir, bitrates, dest_path, MOVE=COPY)
