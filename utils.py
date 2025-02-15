@@ -12,13 +12,13 @@ import matplotlib.pyplot as plt
 import torchvision.transforms as transforms
 import subprocess
 
-# windows titanium
-VRRML = r'D:\VRR_data\VRRML'
-VRRML_DATA = r'D:\VRR_data\VRRML\ML'
-VRR_reference = r'D:\VRR_data\VRRMP4\reference'
-VRRMP4_reference = r'D:\VRR_data\VRRMP4\reference'
-VRR_Patches = r'D:\VRR_data\VRR_Patches'
-VRR_Motion = r'D:\VRR\VRR_Motion'
+# # windows titanium
+# VRRML = r'D:\VRR_data\VRRML'
+# VRRML_DATA = r'D:\VRR_data\VRRML\ML'
+# VRR_reference = r'D:\VRR_data\VRRMP4\reference'
+# VRRMP4_reference = r'D:\VRR_data\VRRMP4\reference'
+# VRR_Patches = r'D:\VRR_data\VRR_Patches'
+# VRR_Motion = r'D:\VRR\VRR_Motion'
 
 
 # # local pc
@@ -29,6 +29,7 @@ VRR_Motion = r'D:\VRR\VRR_Motion'
 # VRR_Patches = f'{VRRDATA}/VRR_Patches'
 # VRR_Motion = r'C:\Users\15142\Projects\VRR\VRR_Motion'
 # VRRML = r'C:\Users\15142\Projects\VRR\Data\VRRML'
+# VRRML_DATA = r'C:\Users\15142\Projects\VRR\Data\VRRML\ML'
 # VRRMP4_reference = r'C:\Users\15142\Projects\VRR\VRRMP4\uploaded\reference'
 # CVVDP_EXCEL = r'C:\Users\15142\Projects\VRR\Data\VRR_Plot_HPC\data-500_1500_2000kbps' 
 
@@ -97,9 +98,8 @@ def create_train_validation_data(train_root):
             shutil.move(folder_path, os.path.join(train_dir, folder))
     shutil.move(val_root, train_root)
     os.rename(f'{train_root}/validation-temp', f'{train_root}/validation')
-    print("All subfolders moved into 'train'.")
-    print(f'total number of files {total_files}, train files {total_files - total_validation_files}, validation files {total_validation_files}')
-    print("Validation dataset created successfully!")
+    print(f'Total data {total_files}, training data {total_files - total_validation_files}, validation data {total_validation_files}')
+    print(f"Saved successfully to {train_root}")
 
 
 def frame_limit_per_fps():

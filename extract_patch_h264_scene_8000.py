@@ -220,11 +220,13 @@ if __name__ == "__main__":
     FRAME_VELOCITY = True
     PATCH_VELOCITY = False
 
-    EXTRACT_PATCH = True 
-    LABEL_DATA = True 
+    EXTRACT_PATCH = False 
+    LABEL_DATA = False 
+    CREATE_TRAIN_VAL_DATA = True
     
     current_date = datetime.date.today()
     output_parent_folder = f'{VRR_Patches}/{current_date}_patch{PATCH_SIZE}x{PATCH_SIZE}'
+    dest_path = f'{output_parent_folder}_labeled_data'
 
     if EXTRACT_PATCH:
         for scene in scenes:
@@ -248,10 +250,7 @@ if __name__ == "__main__":
     
     if LABEL_DATA:
         bitrates = [500, 1000, 1500, 2000]
-        dest_path = f'{output_parent_folder}_labeled_data'
-
         COPY = True # False True
-        FRAMENUMBER_SHOW = True
 
         # scene_velocity_dicts = {'suntemple_statue': bistro_max_comb_per_sequence}
         for scene in scene_arr:
@@ -262,4 +261,8 @@ if __name__ == "__main__":
             scene_dir = f'{output_parent_folder}/reference_{scene}'
             velocity_dict = scene_velocity_dicts[scene] # scene_velocity_dicts[scene] dropJOD
             rename_subfolders_for_scene(scene, velocity_dict, scene_dir, bitrates, dest_path, MOVE=COPY, FRAMENUMBER_SHOW=FRAMENUMBER_SHOW)
-        print(f'labeled data are saved to {dest_path}')
+        print(f'\nLabeled data are saved to {dest_path}\n')
+
+    if CREATE_TRAIN_VAL_DATA:
+        # in place move
+        create_train_validation_data(dest_path)
