@@ -1,6 +1,7 @@
 import os
 import math
 import glob
+import random
 import imageio
 import shutil
 import secrets
@@ -13,9 +14,12 @@ import subprocess
 
 # windows titanium
 VRRML = r'D:\VRR_data\VRRML'
+VRRML_DATA = r'D:\VRR_data\VRRML\ML'
 VRR_reference = r'D:\VRR_data\VRRMP4\reference'
+VRRMP4_reference = r'D:\VRR_data\VRRMP4\reference'
 VRR_Patches = r'D:\VRR_data\VRR_Patches'
 VRR_Motion = r'D:\VRR\VRR_Motion'
+
 
 # # local pc
 # CVVDPDIR = 'C:/Users/15142/Projects/ColorVideoVDP'
@@ -50,6 +54,52 @@ scene_arr = ['bedroom', 'bistro',
 
 def count_files_in_folder(folder_path):
     return len([f for f in os.listdir(folder_path) if os.path.isfile(os.path.join(folder_path, f))])
+
+
+def create_train_validation_data(train_root):
+    # Ensure the validation directory exists
+    val_root = f"{VRRML_DATA}/validation-temp"   # Validation data root
+
+    os.makedirs(val_root, exist_ok=True)
+    total_files = 0
+    total_validation_files = 0
+    # Iterate over each subfolder (e.g., "360x30", "480x60", etc.)
+    for subfolder in os.listdir(train_root):
+        subfolder_path = os.path.join(train_root, subfolder)
+        val_subfolder_path = os.path.join(val_root, subfolder)
+        
+        if os.path.isdir(subfolder_path):  # Ensure it's a directory
+            os.makedirs(val_subfolder_path, exist_ok=True)  # Create validation subfolder
+            
+            # Get all files in the subfolder
+            files = [f for f in os.listdir(subfolder_path) if os.path.isfile(os.path.join(subfolder_path, f))]
+            
+            # Select 10% of files randomly
+            num_val_samples = max(1, int(len(files) * 0.10))  # Ensure at least 1 file is selected
+            total_validation_files += num_val_samples
+            total_files += len(files)
+            val_files = random.sample(files, num_val_samples)
+            
+            # Move selected files to the validation folder
+            for file in val_files:
+                # print(f'file {file}')
+                shutil.move(os.path.join(subfolder_path, file), os.path.join(val_subfolder_path, file))
+
+    train_dir = os.path.join(train_root, "train")
+    os.makedirs(train_dir, exist_ok=True)
+    # Loop through all items in the parent directory
+    for folder in os.listdir(train_root):
+        folder_path = os.path.join(train_root, folder)
+        
+        # Check if it's a directory and not the "train" folder
+        if os.path.isdir(folder_path) and folder != "train":
+            # Move the directory into "train"
+            shutil.move(folder_path, os.path.join(train_dir, folder))
+    shutil.move(val_root, train_root)
+    os.rename(f'{train_root}/validation-temp', f'{train_root}/validation')
+    print("All subfolders moved into 'train'.")
+    print(f'total number of files {total_files}, train files {total_files - total_validation_files}, validation files {total_validation_files}')
+    print("Validation dataset created successfully!")
 
 
 def frame_limit_per_fps():
