@@ -12,13 +12,13 @@ import matplotlib.pyplot as plt
 import torchvision.transforms as transforms
 import subprocess
 
-# # windows titanium
-# VRRML = r'D:\VRR_data\VRRML'
-# VRRML_DATA = r'D:\VRR_data\VRRML\ML'
-# VRR_reference = r'D:\VRR_data\VRRMP4\reference'
-# VRRMP4_reference = r'D:\VRR_data\VRRMP4\reference'
-# VRR_Patches = r'D:\VRR_data\VRR_Patches'
-# VRR_Motion = r'D:\VRR\VRR_Motion'
+# windows titanium
+VRRML = r'D:\VRR_data\VRRML'
+VRRML_DATA = r'D:\VRR_data\VRRML\ML'
+VRR_reference = r'D:\VRR_data\VRRMP4\reference'
+VRRMP4_reference = r'D:\VRR_data\VRRMP4\reference'
+VRR_Patches = r'D:\VRR_data\VRR_Patches'
+VRR_Motion = r'D:\VRR\VRR_Motion'
 
 
 # # local pc
@@ -68,6 +68,7 @@ def create_train_validation_data(train_root):
     for subfolder in os.listdir(train_root):
         subfolder_path = os.path.join(train_root, subfolder)
         val_subfolder_path = os.path.join(val_root, subfolder)
+        print(f'subfolder {subfolder}')
         
         if os.path.isdir(subfolder_path):  # Ensure it's a directory
             os.makedirs(val_subfolder_path, exist_ok=True)  # Create validation subfolder
@@ -100,6 +101,10 @@ def create_train_validation_data(train_root):
     os.rename(f'{train_root}/validation-temp', f'{train_root}/validation')
     print(f'Total data {total_files}, training data {total_files - total_validation_files}, validation data {total_validation_files}')
     print(f"Saved successfully to {train_root}")
+
+def config_create_test_data(folder):
+    scenes = ['sibenik','suntemple_statue']
+    return scenes, False, True, f'{folder}_test'
 
 
 def frame_limit_per_fps():
