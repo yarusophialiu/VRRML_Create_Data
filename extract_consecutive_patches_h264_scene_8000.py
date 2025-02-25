@@ -182,7 +182,7 @@ def generate_patches(base_dir, path_name, motion_vector_path, motion_video_path,
 
         hex_unique_id = secrets.token_hex(4)
         # path = f'{output_folder}/{hex_unique_id}_{frame_index}_{fps}_{resolution}_{bitrate}.png'
-        path = f'{output_dir}/{hex_unique_id}_{int(velocity*1000)}.png' if not FRAMENUMBER_SHOW else f'{output_dir}/{hex_unique_id}_{frame_number}_{int(velocity*1000)}.png'
+        path = f'{output_dir}/{hex_unique_id}_{int(velocity*1e5)}.png' if not FRAMENUMBER_SHOW else f'{output_dir}/{hex_unique_id}_{frame_number}_{int(velocity*1e5)}.png'
         if SAVE:
             concatenated_patches.save(path, "png")
         frame_generated += 1
@@ -194,17 +194,17 @@ def generate_patches(base_dir, path_name, motion_vector_path, motion_video_path,
 
 
 def compute_per_bitrate(fps, resolution, path_name, frame_velocity_path, total):
-    print(f'====================== fps, resolution {fps, resolution}, {path_name} ======================')
+    # print(f'====================== {path_name} ======================')
     frame_created_per_fps_video = 276 # frame_per_fps_video(fps) # how many frames does this fps video have
     # print(f'frame_created_per_fps_video {frame_created_per_fps_video}')
     frame_indices = [i for i in range(276)]
     count = 0 # count total number of patches generated for the fps
     patch_generated = generate_patches(base_directory, path_name, motion_vector_path, motion_video_path, \
                                     frame_indices, frame_velocity_path, output_dir=output_folder, scene=scene, patch_size=(PATCH_SIZE, PATCH_SIZE))
-    print(f'{patch_generated} patches generated for resolution {resolution}p')
+    # print(f'{patch_generated} patches generated for resolution {resolution}p')
     count += patch_generated
     total += count
-    print(f'total {total}, {count} data generated')
+    print(f'{path_name}, {count} data generated')
 
 
 # each id is 1 path_seg_speed, loop through all scenes given 1 id
@@ -243,27 +243,30 @@ if __name__ == "__main__":
     EXTRACT_PATCH = True 
     LABEL_DATA = True 
     CREATE_TRAIN_VAL_DATA = True
+    CREATE_TEST_DATA = True # True, False
     
     current_date = datetime.date.today()
     output_parent_folder = f'{VRR_Patches}/{current_date}_consecutive_patches'
     dest_path = f'{output_parent_folder}_labeled_data'
+    if CREATE_TEST_DATA:
+        scenes, CREATE_TRAIN_VAL_DATA, LABEL_DATA, output_parent_folder = config_create_test_data(output_parent_folder)
+    dest_path = f'{output_parent_folder}_labeled_data'
+    print(f'CREATE_TRAIN_VAL_DATA {CREATE_TRAIN_VAL_DATA}')
+    print(f'dest_path {dest_path}')
 
     if EXTRACT_PATCH:
         for scene in scenes:
-            for id in range(1, 2): # 46
+            print(f'====================== scene {scene} ======================')
+            for id in range(1, 46): # 46
                 id -= 1
                 path, seg, speed = mapIdToPath(id)
                 # print(f'path, seg, speed {path, seg, speed}')
-
-                print(f'====================== scene {scene} ======================')
                 base_directory = f'{VRRMP4_reference}/{scene}'
                 output_folder = f'{output_parent_folder}/reference_{scene}/{scene}_path{path}_seg{seg}_{speed}'
                 frame_velocity_path = f'{VRR_Motion}/reference/magnitude_motion_per_frame/{scene}/{scene}_path{path}_seg{seg}_{speed}_velocity_per_frame.txt'
                 os.makedirs(output_folder, exist_ok=True)
 
                 path_name = f'{scene}_path{path}_seg{seg}_{speed}'
-                # print(f'path_name {path_name}')
-
                 total = 0
                 motion_vector_path = f'{VRR_Motion}/reference/motion_vector_reference/{scene}/{scene}_path{path}_seg{seg}_{speed}_velocity_cleaned.txt'
                 motion_video_path = f'{VRR_Motion}/reference/refMP4_reference/{scene}/{scene}_path{path}_seg{seg}_{speed}_refOutput_166_1080_8000.mp4'
@@ -274,7 +277,7 @@ if __name__ == "__main__":
         COPY = True # False True
 
         # scene_velocity_dicts = {'suntemple_statue': bistro_max_comb_per_sequence}
-        for scene in scene_arr:
+        for scene in scenes:
             if not os.path.exists(output_parent_folder):
                 print(f"Folder '{output_parent_folder}' does not exist. Exiting...")
                 exit()  # Stop the script execution

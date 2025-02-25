@@ -123,7 +123,7 @@ def generate_patches(base_dir, path_name, motion_vector_path, motion_video_path,
     cap = cv2.VideoCapture(video_path)    
     if not cap.isOpened():
         print("Error opening video file")
-        return
+        return 0
     frame_generated = 0
     frame_number = 0 # decoded video frame index that will be passed to find_motion_patch_h265
     while cap.isOpened(): # Read until video is completed
@@ -159,7 +159,7 @@ def generate_patches(base_dir, path_name, motion_vector_path, motion_video_path,
 
         hex_unique_id = secrets.token_hex(4)
         # path = f'{output_folder}/{hex_unique_id}_{frame_index}_{fps}_{resolution}_{bitrate}.png'
-        path = f'{output_dir}/{hex_unique_id}_{int(velocity*1000)}.png' if not FRAMENUMBER_SHOW else f'{output_dir}/{hex_unique_id}_{frame_number}_{int(velocity*1000)}.png'
+        path = f'{output_dir}/{hex_unique_id}_{int(velocity*1e5)}.png' if not FRAMENUMBER_SHOW else f'{output_dir}/{hex_unique_id}_{frame_number}_{int(velocity*1e5)}.png'
         if SAVE:
             to_pil = transforms.ToPILImage()
             interpolated_patch = to_pil(interpolated_patch)
@@ -174,7 +174,6 @@ def generate_patches(base_dir, path_name, motion_vector_path, motion_video_path,
 
 
 def compute_per_bitrate(fps, resolution, path_name, frame_velocity_path, total):
-    print(f'====================== fps, resolution {fps, resolution}, {path_name} ======================')
     frame_created_per_fps_video = 276 # frame_per_fps_video(fps) # how many frames does this fps video have
     # print(f'frame_created_per_fps_video {frame_created_per_fps_video}')
     frame_indices = [i for i in range(276)]
@@ -184,7 +183,7 @@ def compute_per_bitrate(fps, resolution, path_name, frame_velocity_path, total):
     print(f'{patch_generated} patches generated for resolution {resolution}p')
     count += patch_generated
     total += count
-    print(f'total {total}, {count} data')
+    print(f'{path_name}, {count} data')
 
 
 # each id is 1 path_seg_speed, loop through all scenes given 1 id
@@ -201,16 +200,17 @@ if __name__ == "__main__":
     # id = 1
    
     scenes = [
-            'bedroom', 
+            # 'bedroom', 
             # 'bistro', 
             #  'crytek_sponza', 
             #  'gallery', 
             #  'living_room', 
             #  'lost_empire', 
-            #  'room', 'suntemple',
-            # 'sibenik',
-            #  'suntemple_statue' 
-             ]
+            #  'room', 
+            # 'suntemple',
+            'sibenik',
+            'suntemple_statue' 
+            ]
 
     fps = 166
     resolution = 1080
@@ -219,22 +219,29 @@ if __name__ == "__main__":
     FRAMENUMBER_SHOW = True
     FRAME_VELOCITY = True
     PATCH_VELOCITY = False
+    DROPJOD = True
 
-    EXTRACT_PATCH = False 
-    LABEL_DATA = False 
+    EXTRACT_PATCH = True 
+    LABEL_DATA = True 
     CREATE_TRAIN_VAL_DATA = True
+    CREATE_TEST_DATA = True # True, False
     
     current_date = datetime.date.today()
     output_parent_folder = f'{VRR_Patches}/{current_date}_patch{PATCH_SIZE}x{PATCH_SIZE}'
     dest_path = f'{output_parent_folder}_labeled_data'
+    if CREATE_TEST_DATA:
+        scenes, CREATE_TRAIN_VAL_DATA, LABEL_DATA, output_parent_folder = config_create_test_data(output_parent_folder)
+    dest_path = f'{output_parent_folder}_labeled_data'
+    print(f'CREATE_TRAIN_VAL_DATA {CREATE_TRAIN_VAL_DATA}')
+    print(f'dest_path {dest_path}')
 
     if EXTRACT_PATCH:
         for scene in scenes:
-            for id in range(1, 2): # 46
+            print(f'====================== scene {scene} ======================')
+            for id in range(1, 46): # 46
                 id -= 1
                 path, seg, speed = mapIdToPath(id)
-                print(f'path, seg, speed {path, seg, speed}')
-                print(f'====================== scene {scene} ======================')
+                # print(f'{scene} path, seg, speed {path, seg, speed}')
                 base_directory = f'{VRRMP4_reference}/{scene}'
                 current_date = datetime.date.today()
                 output_folder = f'{output_parent_folder}/reference_{scene}/{scene}_path{path}_seg{seg}_{speed}'
@@ -253,16 +260,21 @@ if __name__ == "__main__":
         COPY = True # False True
 
         # scene_velocity_dicts = {'suntemple_statue': bistro_max_comb_per_sequence}
-        for scene in scene_arr:
+        for scene in scenes:
             if not os.path.exists(output_parent_folder):
                 print(f"Folder '{output_parent_folder}' does not exist. Exiting...")
                 exit()  # Stop the script execution
                 
             scene_dir = f'{output_parent_folder}/reference_{scene}'
-            velocity_dict = scene_velocity_dicts[scene] # scene_velocity_dicts[scene] dropJOD
+            if DROPJOD:
+                velocity_dict = drop_JOD_dicts[scene]
+            else:
+                velocity_dict = scene_velocity_dicts[scene] # scene_velocity_dicts[scene] dropJOD
             rename_subfolders_for_scene(scene, velocity_dict, scene_dir, bitrates, dest_path, MOVE=COPY, FRAMENUMBER_SHOW=FRAMENUMBER_SHOW)
         print(f'\nLabeled data are saved to {dest_path}\n')
 
     if CREATE_TRAIN_VAL_DATA:
         # in place move
         create_train_validation_data(dest_path)
+
+    print(f'DROPJOD {DROPJOD}')
