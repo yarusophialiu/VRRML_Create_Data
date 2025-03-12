@@ -10,3 +10,14 @@ bedroom_path3_seg3_3_refOutput_166_1080_8000
 py: change scene_arr, cat 
 python os.makedirs(f'/home/yl962/rds/hpc-work/VRR/logs/{scene}', exist_ok=True)
 sh： makedir -p /home/yl962/rds/hpc-work/VRR/logs/scene
+
+extract patches + label data + create train val test data:
+extract_patch_h264_scene_8000.py
+extract_consecutive_patches_h264_scene_8000.py
+extract_random_patches_h264_scene_8000.py
+patches are all saved to D:\VRR_data\VRR_Patches
+
+concatenate velocity and move patches based on labels:
+prepare_dataset_reference.py
+
+
