@@ -107,11 +107,11 @@ def find_motion_patch_h265(video_path, dec_fps, fps, dec_frame_number, px, py, p
     return patch
 
 def concatenate_images(img1, img2):
-        concatenated_patches = torch.cat((img1, img2), dim=2)  # dim=2 for width
-        # show_patch(concatenated_patches.permute(1, 2, 0)) # 3, 128, 256 if patch size 128
-        to_pil = transforms.ToPILImage()
-        concatenated_patches = to_pil(concatenated_patches)
-        return concatenated_patches
+    concatenated_patches = torch.cat((img1, img2), dim=2)  # dim=2 for width
+    # show_patch(concatenated_patches.permute(1, 2, 0)) # 3, 128, 256 if patch size 128
+    to_pil = transforms.ToPILImage()
+    concatenated_patches = to_pil(concatenated_patches)
+    return concatenated_patches
 
 
 def read_frame_velocity(frame_velocity_path, frame_number):
@@ -135,7 +135,7 @@ def generate_patches(base_dir, path_name, motion_vector_path, motion_video_path,
     cap = cv2.VideoCapture(video_path)    
     if not cap.isOpened():
         print("Error opening video file")
-        return
+        return 0
     frame_generated = 0
     frame_number = 0 # decoded video frame index that will be passed to find_motion_patch_h265
     prev_frame = None
@@ -222,13 +222,13 @@ if __name__ == "__main__":
 
     scenes = [
             'bedroom', 
-            # 'bistro', 
-            #  'crytek_sponza', 
-            #  'gallery', 
-            #  'living_room', 
-            #  'lost_empire', 
-            #  'room', 
-            # 'suntemple',
+            'bistro', 
+             'crytek_sponza', 
+             'gallery', 
+             'living_room', 
+             'lost_empire', 
+             'room', 
+            'suntemple',
             # 'sibenik',
             # 'suntemple_statue' 
              ]
@@ -239,6 +239,7 @@ if __name__ == "__main__":
     FRAMENUMBER_SHOW = True
     FRAME_VELOCITY = True
     PATCH_VELOCITY = False
+    DROPJOD = False # True, False
     
     EXTRACT_PATCH = True 
     LABEL_DATA = True 
@@ -282,7 +283,10 @@ if __name__ == "__main__":
                 print(f"Folder '{output_parent_folder}' does not exist. Exiting...")
                 exit()  # Stop the script execution
             scene_dir = f'{output_parent_folder}/reference_{scene}'
-            velocity_dict = scene_velocity_dicts[scene] # scene_velocity_dicts[scene]
+            if DROPJOD:
+                velocity_dict = drop_JOD_dicts[scene]
+            else:
+                velocity_dict = scene_velocity_dicts[scene] # scene_velocity_dicts[scene]
             rename_subfolders_for_scene(scene, velocity_dict, scene_dir, bitrates, dest_path, MOVE=COPY, FRAMENUMBER_SHOW=FRAMENUMBER_SHOW)
         print(f'\nLabeled data are saved to {dest_path}\n')
     

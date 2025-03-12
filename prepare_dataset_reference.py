@@ -8,7 +8,7 @@ from utils import scene_velocity_dicts, drop_JOD_dicts, VRRML
 
 
 def rename_subfolders_for_scene(scene, velocity_dict, scene_folder, bitrates, dest_path, MOVE=False, FRAMENUMBER_SHOW=False):
-    # print(f'scene_folder {scene_folder}')
+    print(f'scene_folder {scene_folder}')
     if not os.path.exists(scene_folder):
         # print(f"Scene folder '{scene_folder}' does not exist. Skipping.")
         return
@@ -16,7 +16,7 @@ def rename_subfolders_for_scene(scene, velocity_dict, scene_folder, bitrates, de
     count = 0
     for sequence_name, params_list in velocity_dict.items(): # bistro_path1_seg1_1: [[xxx], [xxx], [xxx]]
         sequence_path = f'{scene_folder}/{scene}_{sequence_name}'
-        # print(f'path folder {scene}_{sequence_name}')
+        print(f'Start labelling {scene}_{sequence_name}')
         # print(f'sequence_path {sequence_path}')
         if not os.path.exists(sequence_path):
             # print(f"Folder '{sequence_path}' does not exist. Skipping.")
@@ -62,8 +62,8 @@ if __name__ == "__main__":
     bitrates = [500, 1000, 1500, 2000]
 
     # titanium
-    reference_dir  = r'D:\VRR_data\VRR_Patches\2025-02-10'
-    dest_path = r'D:\VRR_data\VRRML\ML\consecutive_patches64x64'
+    reference_dir  = r'D:\VRR_data\VRR_Patches\2025-03-10_patch64x64'
+    dest_path = r'D:\VRR_data\VRRML\ML\2025-03-10_patch64x64_labeled'
 
     # reference_dir  = r'C:\Users\15142\Projects\VRR\Data\VRR_Patches\2025-01-30'
     # dest_path = r'C:\Users\15142\Projects\VRR\Data\VRR_Patches\reference_new64'

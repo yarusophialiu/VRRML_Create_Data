@@ -136,7 +136,7 @@ def generate_patches(base_dir, path_name, motion_vector_path, motion_video_path,
     cap = cv2.VideoCapture(video_path)    
     if not cap.isOpened():
         print("Error opening video file")
-        return
+        return 0
     frame_generated = 0
     frame_number = 0 # decoded video frame index that will be passed to find_motion_patch_h265
     prev_frame = None
@@ -224,18 +224,17 @@ if __name__ == "__main__":
     # scene = args.scene
     # id = 1
     RANDOM = True
-    DROPJOD = True
     scenes = [
-            # 'bedroom', 
-            # 'bistro', 
-            #  'crytek_sponza', 
-            #  'gallery', 
-            #  'living_room', 
-            #  'lost_empire', 
-            #  'room', 
-            # 'suntemple',
-            'sibenik',
-            'suntemple_statue' 
+            'bedroom', 
+            'bistro', 
+             'crytek_sponza', 
+             'gallery', 
+             'living_room', 
+             'lost_empire', 
+             'room', 
+             'suntemple',
+            # 'sibenik',
+            # 'suntemple_statue' 
              ]
     fps = 166
     resolution = 1080
@@ -244,11 +243,12 @@ if __name__ == "__main__":
     FRAMENUMBER_SHOW = True
     FRAME_VELOCITY = True
     PATCH_VELOCITY = False
+    DROPJOD = False # True, False
 
-    EXTRACT_PATCH = False 
-    LABEL_DATA = False 
-    CREATE_TRAIN_VAL_DATA = False
-    CREATE_TEST_DATA = True # True, False
+    EXTRACT_PATCH = True 
+    LABEL_DATA = True 
+    CREATE_TRAIN_VAL_DATA = True
+    CREATE_TEST_DATA = False # True, False
     
     current_date = datetime.date.today()
     output_parent_folder = f'{VRR_Patches}/{current_date}_random_patches'
