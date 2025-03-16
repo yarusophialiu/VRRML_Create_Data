@@ -11,27 +11,30 @@ from PIL import Image
 import matplotlib.pyplot as plt
 import torchvision.transforms as transforms
 import subprocess
-
-# windows titanium
-VRRML = r'D:\VRR_data\VRRML'
-VRRML_DATA = r'D:\VRR_data\VRRML\ML'
-VRR_reference = r'D:\VRR_data\VRRMP4\reference'
-VRRMP4_reference = r'D:\VRR_data\VRRMP4\reference'
-VRR_Patches = r'D:\VRR_data\VRR_Patches'
-VRR_Motion = r'D:\VRR\VRR_Motion'
+import pandas as pd
+from collections import Counter
 
 
-# # local pc
-# CVVDPDIR = 'C:/Users/15142/Projects/ColorVideoVDP'
-# VRRMP4 = r'C:\Users\15142\Projects\VRR\VRRMP4'
-# VRRMP4_CVVDP = r'C:\Users\15142\Projects\VRR\VRRMP4_CVVDP'
-# VRRDATA = r'C:\Users\15142\Projects\VRR\Data'
-# VRR_Patches = f'{VRRDATA}/VRR_Patches'
-# VRR_Motion = r'C:\Users\15142\Projects\VRR\VRR_Motion'
-# VRRML = r'C:\Users\15142\Projects\VRR\Data\VRRML'
-# VRRML_DATA = r'C:\Users\15142\Projects\VRR\Data\VRRML\ML'
-# VRRMP4_reference = r'C:\Users\15142\Projects\VRR\VRRMP4\uploaded\reference'
-# CVVDP_EXCEL = r'C:\Users\15142\Projects\VRR\Data\VRR_Plot_HPC\data-500_1500_2000kbps' 
+# # windows titanium
+# VRRML = r'D:\VRR_data\VRRML'
+# VRRML_DATA = r'D:\VRR_data\VRRML\ML'
+# VRR_reference = r'D:\VRR_data\VRRMP4\reference'
+# VRRMP4_reference = r'D:\VRR_data\VRRMP4\reference'
+# VRR_Patches = r'D:\VRR_data\VRR_Patches'
+# VRR_Motion = r'D:\VRR\VRR_Motion'
+
+
+# local pc
+CVVDPDIR = 'C:/Users/15142/Projects/ColorVideoVDP'
+VRRMP4 = r'C:\Users\15142\Projects\VRR\VRRMP4'
+VRRMP4_CVVDP = r'C:\Users\15142\Projects\VRR\VRRMP4_CVVDP'
+VRRDATA = r'C:\Users\15142\Projects\VRR\Data'
+VRR_Patches = f'{VRRDATA}/VRR_Patches'
+VRR_Motion = r'C:\Users\15142\Projects\VRR\VRR_Motion'
+VRRML = r'C:\Users\15142\Projects\VRR\Data\VRRML'
+VRRML_DATA = r'C:\Users\15142\Projects\VRR\Data\VRRML\ML'
+VRRMP4_reference = r'C:\Users\15142\Projects\VRR\VRRMP4\uploaded\reference'
+CVVDP_EXCEL = r'C:\Users\15142\Projects\VRR\Data\VRR_Plot_HPC\data-500_1500_2000kbps' 
 
 # # HPC
 # # CVVDPDIR = 'C:/Users/15142/Projects/ColorVideoVDP'
@@ -57,6 +60,32 @@ def count_files_in_folder(folder_path):
     return len([f for f in os.listdir(folder_path) if os.path.isfile(os.path.join(folder_path, f))])
 
 
+def count_data_labels(training_folder, output_csv_path):
+    subfolder_counts = Counter()
+
+    # Loop through each subfolder in the training folder
+    for subfolder in os.listdir(training_folder):
+        subfolder_path = os.path.join(training_folder, subfolder)
+        if os.path.isdir(subfolder_path):  # Ensure it's a directory
+            # Count number of images in the subfolder (assuming images are files)
+            image_count = len([f for f in os.listdir(subfolder_path) if os.path.isfile(os.path.join(subfolder_path, f))])
+            subfolder_counts[subfolder] = image_count
+
+    # Convert to DataFrame and sort by count (descending)
+    df_subfolder_counts = pd.DataFrame(subfolder_counts.items(), columns=["Subfolder", "Image Count"])
+    df_subfolder_counts = df_subfolder_counts.sort_values(by="Image Count", ascending=False)
+
+    total_images = df_subfolder_counts["Image Count"].sum()
+    print("Total number of images:", total_images) # 351748
+    num_rows = len(df_subfolder_counts)
+    print("Number of rows:", num_rows)
+    num_data_each_label =  int(total_images/num_rows)
+    print(f'num_data_each_label {num_data_each_label}')
+
+    df_subfolder_counts.to_csv(output_csv_path, index=False)
+
+
+
 def create_train_validation_data(train_root):
     # Ensure the validation directory exists
     val_root = f"{VRRML_DATA}/validation-temp"   # Validation data root
@@ -68,7 +97,7 @@ def create_train_validation_data(train_root):
     for subfolder in os.listdir(train_root):
         subfolder_path = os.path.join(train_root, subfolder)
         val_subfolder_path = os.path.join(val_root, subfolder)
-        print(f'subfolder {subfolder}')
+        # print(f'subfolder {subfolder}')
         
         if os.path.isdir(subfolder_path):  # Ensure it's a directory
             os.makedirs(val_subfolder_path, exist_ok=True)  # Create validation subfolder
@@ -89,7 +118,6 @@ def create_train_validation_data(train_root):
 
     train_dir = os.path.join(train_root, "train")
     os.makedirs(train_dir, exist_ok=True)
-    # Loop through all items in the parent directory
     for folder in os.listdir(train_root):
         folder_path = os.path.join(train_root, folder)
         
@@ -439,6 +467,7 @@ scene_velocity_dicts = {
         'suntemple_statue': suntemple_statue_max_comb_per_sequence
     }
 
+# drop jod 0.25
 bedroom_comb_drop_JOD = {'path1_seg1_1': [[30, 720], [30, 720], [30, 720], [30, 720]], 'path1_seg1_2': [[40, 720], [40, 720], [50, 720], [50, 720]], 'path1_seg1_3': [[50, 720], [50, 720], [60, 720], [60, 720]], 'path1_seg2_1': [[30, 720], [40, 720], [40, 720], [40, 720]], 'path1_seg2_2': [[50, 480], [50, 720], [50, 720], [60, 720]], 'path1_seg2_3': [[50, 480], [70, 480], [60, 720], [70, 720]], 'path1_seg3_1': [[40, 720], [40, 720], [50, 720], [50, 720]], 'path1_seg3_2': [[50, 480], [80, 480], [60, 720], [70, 720]], 'path1_seg3_3': [[60, 480], [80, 480], [80, 480], [80, 720]], 'path2_seg1_1': [[40, 480], [40, 720], [40, 720], [40, 720]], 'path2_seg1_2': [[40, 480], [60, 480], [60, 720], [60, 720]], 'path2_seg1_3': [[50, 480], [60, 480], [70, 480], [80, 480]], 'path2_seg2_1': [[50, 480], [50, 720], [50, 720], [50, 720]], 'path2_seg2_2': [[70, 360], [100, 360], [100, 480], [110, 480]], 'path2_seg2_3': [[60, 360], [80, 360], [80, 480], [90, 480]], 'path2_seg3_1': [[30, 720], [30, 720], [30, 720], [40, 720]], 'path2_seg3_2': [[50, 360], [60, 480], [70, 480], [80, 480]], 'path2_seg3_3': [[50, 360], [60, 480], [70, 480], [80, 480]], 'path3_seg1_1': [[30, 720], [40, 720], [40, 720], [40, 720]], 'path3_seg1_2': [[50, 480], [50, 720], [60, 720], [60, 720]], 'path3_seg1_3': [[60, 360], [60, 480], [80, 480], [80, 480]], 'path3_seg2_1': [[30, 720], [30, 720], [30, 720], [30, 720]], 'path3_seg2_2': [[40, 480], [50, 480], [70, 480], [50, 720]], 'path3_seg2_3': [[70, 360], [80, 480], [90, 480], [100, 480]], 'path3_seg3_1': [[50, 480], [60, 480], [80, 480], [60, 720]], 'path3_seg3_2': [[60, 360], [90, 360], [80, 480], [80, 480]], 'path3_seg3_3': [[80, 360], [90, 360], [90, 360], [90, 360]], 'path4_seg1_1': [[50, 480], [50, 720], [60, 720], [60, 720]], 'path4_seg1_2': [[60, 360], [70, 480], [70, 720], [80, 720]], 'path4_seg1_3': [[60, 360], [70, 480], [80, 480], [100, 480]], 'path4_seg2_1': [[60, 720], [70, 720], [70, 720], [80, 720]], 'path4_seg2_2': [[70, 480], [70, 720], [80, 720], [80, 720]], 'path4_seg2_3': [[80, 360], [90, 480], [110, 480], [110, 480]], 'path4_seg3_1': [[100, 360], [110, 360], [110, 360], [110, 360]], 'path4_seg3_2': [[90, 360], [120, 480], [100, 720], [100, 720]], 'path4_seg3_3': [[80, 360], [80, 480], [90, 480], [110, 480]], 'path5_seg1_1': [[60, 480], [60, 720], [70, 720], [80, 720]], 'path5_seg1_2': [[60, 360], [70, 480], [80, 480], [90, 480]], 'path5_seg1_3': [[50, 360], [60, 480], [80, 480], [90, 480]], 'path5_seg2_1': [[30, 720], [40, 720], [40, 720], [40, 720]], 'path5_seg2_2': [[70, 360], [80, 480], [100, 480], [110, 480]], 'path5_seg2_3': [[80, 360], [90, 360], [110, 360], [110, 360]], 'path5_seg3_1': [[50, 720], [60, 720], [60, 720], [70, 720]], 'path5_seg3_2': [[70, 480], [80, 720], [80, 720], [80, 720]], 'path5_seg3_3': [[80, 360], [80, 480], [90, 480], [90, 480]]}
 bistro_comb_drop_JOD = {'path1_seg1_1': [[30, 720], [30, 1080], [40, 1080], [40, 1080]], 'path1_seg1_2': [[40, 720], [60, 720], [60, 720], [70, 720]], 'path1_seg1_3': [[80, 360], [90, 480], [120, 480], [90, 720]], 'path1_seg2_1': [[40, 720], [50, 720], [70, 720], [70, 864]], 'path1_seg2_2': [[70, 360], [90, 480], [110, 480], [110, 480]], 'path1_seg2_3': [[80, 360], [90, 480], [110, 480], [110, 480]], 'path1_seg3_1': [[30, 720], [40, 720], [50, 720], [50, 864]], 'path1_seg3_2': [[70, 480], [70, 720], [80, 720], [80, 720]], 'path1_seg3_3': [[80, 480], [100, 480], [120, 480], [90, 720]], 'path2_seg1_1': [[40, 720], [50, 720], [60, 720], [70, 720]], 'path2_seg1_2': [[70, 360], [90, 480], [80, 720], [90, 720]], 'path2_seg1_3': [[70, 360], [90, 480], [110, 480], [120, 480]], 'path2_seg2_1': [[40, 720], [60, 720], [70, 720], [80, 720]], 'path2_seg2_2': [[70, 360], [80, 480], [100, 480], [110, 480]], 'path2_seg2_3': [[80, 360], [100, 360], [100, 360], [120, 360]], 'path2_seg3_1': [[30, 720], [40, 720], [40, 1080], [50, 864]], 'path2_seg3_2': [[60, 480], [70, 720], [80, 720], [80, 720]], 'path2_seg3_3': [[80, 360], [90, 480], [80, 720], [90, 720]], 'path3_seg1_1': [[60, 480], [80, 480], [80, 720], [80, 720]], 'path3_seg1_2': [[60, 480], [80, 480], [70, 720], [80, 720]], 'path3_seg1_3': [[90, 360], [100, 480], [120, 480], [120, 480]], 'path3_seg2_1': [[60, 480], [70, 720], [80, 720], [80, 720]], 'path3_seg2_2': [[60, 480], [70, 720], [80, 720], [80, 720]], 'path3_seg2_3': [[70, 360], [90, 480], [80, 720], [80, 720]], 'path3_seg3_1': [[60, 480], [60, 720], [70, 720], [80, 720]], 'path3_seg3_2': [[70, 360], [90, 480], [110, 480], [120, 480]], 'path3_seg3_3': [[70, 360], [80, 360], [90, 360], [100, 360]], 'path4_seg1_1': [[70, 480], [80, 720], [90, 720], [90, 720]], 'path4_seg1_2': [[80, 360], [80, 480], [90, 480], [100, 480]], 'path4_seg1_3': [[80, 360], [90, 480], [100, 480], [110, 480]], 'path4_seg2_1': [[60, 480], [70, 720], [80, 720], [80, 720]], 'path4_seg2_2': [[80, 360], [100, 360], [90, 480], [100, 480]], 'path4_seg2_3': [[80, 360], [90, 480], [100, 480], [110, 480]], 'path4_seg3_1': [[80, 360], [100, 480], [110, 480], [110, 480]], 'path4_seg3_2': [[90, 360], [120, 360], [120, 360], [120, 360]], 'path4_seg3_3': [[100, 360], [110, 360], [110, 360], [120, 360]], 'path5_seg1_1': [[60, 480], [60, 720], [70, 720], [80, 720]], 'path5_seg1_2': [[60, 480], [60, 720], [80, 720], [80, 720]], 'path5_seg1_3': [[60, 480], [80, 720], [80, 720], [90, 720]], 'path5_seg2_1': [[70, 480], [70, 720], [80, 720], [80, 720]], 'path5_seg2_2': [[70, 480], [80, 720], [80, 720], [90, 720]], 'path5_seg2_3': [[70, 360], [90, 480], [120, 480], [120, 480]], 'path5_seg3_1': [[110, 360], [110, 360], [110, 360], [110, 360]], 'path5_seg3_2': [[110, 360], [110, 360], [110, 360], [110, 360]], 'path5_seg3_3': [[100, 360], [110, 360], [120, 360], [120, 360]]}
 crytek_sponza_comb_drop_JOD = {'path1_seg1_1': [[40, 720], [60, 720], [60, 1080], [60, 1080]], 'path1_seg1_2': [[70, 480], [80, 480], [120, 480], [100, 720]], 'path1_seg1_3': [[70, 360], [80, 480], [90, 480], [100, 480]], 'path1_seg2_1': [[30, 720], [50, 720], [40, 1080], [40, 1080]], 'path1_seg2_2': [[60, 480], [70, 720], [80, 720], [80, 720]], 'path1_seg2_3': [[70, 480], [80, 480], [80, 720], [90, 720]], 'path1_seg3_1': [[30, 720], [40, 720], [30, 1080], [40, 1080]], 'path1_seg3_2': [[50, 720], [60, 720], [60, 720], [70, 720]], 'path1_seg3_3': [[70, 480], [80, 720], [80, 720], [90, 720]], 'path2_seg1_1': [[30, 720], [30, 720], [40, 720], [40, 864]], 'path2_seg1_2': [[50, 480], [60, 720], [70, 720], [70, 720]], 'path2_seg1_3': [[50, 480], [70, 480], [70, 720], [80, 720]], 'path2_seg2_1': [[30, 720], [30, 720], [30, 1080], [30, 1080]], 'path2_seg2_2': [[40, 720], [50, 720], [50, 720], [60, 720]], 'path2_seg2_3': [[50, 480], [60, 720], [60, 720], [70, 720]], 'path2_seg3_1': [[30, 720], [30, 720], [40, 720], [40, 720]], 'path2_seg3_2': [[50, 480], [60, 720], [60, 720], [70, 720]], 'path2_seg3_3': [[50, 480], [80, 480], [80, 720], [80, 720]], 'path3_seg1_1': [[30, 720], [30, 720], [30, 720], [30, 864]], 'path3_seg1_2': [[50, 720], [60, 720], [70, 720], [70, 720]], 'path3_seg1_3': [[60, 480], [70, 720], [80, 720], [80, 720]], 'path3_seg2_1': [[30, 720], [30, 720], [40, 720], [40, 720]], 'path3_seg2_2': [[50, 720], [50, 720], [60, 720], [60, 720]], 'path3_seg2_3': [[60, 720], [70, 720], [70, 720], [80, 720]], 'path3_seg3_1': [[30, 720], [40, 720], [40, 720], [40, 864]], 'path3_seg3_2': [[40, 720], [50, 720], [50, 720], [60, 720]], 'path3_seg3_3': [[50, 720], [60, 720], [60, 720], [70, 720]], 'path4_seg1_1': [[30, 720], [30, 720], [30, 864], [30, 864]], 'path4_seg1_2': [[30, 720], [30, 720], [30, 864], [40, 720]], 'path4_seg1_3': [[40, 720], [40, 720], [40, 720], [40, 720]], 'path4_seg2_1': [[30, 720], [30, 720], [30, 720], [30, 864]], 'path4_seg2_2': [[30, 720], [30, 720], [30, 720], [30, 864]], 'path4_seg2_3': [[30, 720], [40, 720], [40, 720], [40, 720]], 'path4_seg3_1': [[30, 720], [30, 864], [30, 1080], [30, 1080]], 'path4_seg3_2': [[30, 720], [30, 720], [40, 720], [40, 864]], 'path4_seg3_3': [[30, 720], [40, 720], [40, 720], [50, 720]], 'path5_seg1_1': [[30, 720], [30, 720], [40, 720], [40, 864]], 'path5_seg1_2': [[50, 480], [50, 720], [60, 720], [70, 720]], 'path5_seg1_3': [[50, 480], [80, 480], [70, 720], [70, 720]], 'path5_seg2_1': [[30, 720], [40, 720], [40, 720], [50, 720]], 'path5_seg2_2': [[60, 360], [80, 480], [70, 720], [80, 720]], 'path5_seg2_3': [[60, 360], [60, 480], [70, 480], [80, 480]], 'path5_seg3_1': [[40, 720], [50, 720], [50, 720], [60, 720]], 'path5_seg3_2': [[60, 480], [80, 480], [110, 480], [120, 480]], 'path5_seg3_3': [[80, 360], [100, 360], [80, 480], [110, 360]]}
